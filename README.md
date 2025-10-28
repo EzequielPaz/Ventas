@@ -1,2 +1,1 @@
-# Ventas
-Ventas
+# GestionVentas
