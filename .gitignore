@@ -1,0 +1,62 @@
+# Archivos de compilación
+bin/
+obj/
+
+# Archivos de usuario de Visual Studio
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Configuración local de VS
+.vscode/
+.vs/
+
+# Archivos temporales y de depuración
+*.log
+*.tlog
+*.pdb
+*.cache
+*.ilk
+
+# Paquetes NuGet
+*.nupkg
+packages/
+*.snupkg
+
+# Archivos generados por el diseñador
+
+
+# Archivos de publicación
+publish/
+*.Publish.xml
+
+# Configuración del sistema
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Archivos del sistema de Mac y Linux (por si usás Git en WSL o Mac)
+.DS_Store
+*.swp
+
+# Archivos de configuración de Rider o JetBrains
+.idea/
+
+# Entorno de prueba
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Archivos de configuración de build
+*.vspscc
+*.vssscc
+*.Backup.tmp
+
+# Ignorar migraciones de Entity Framework
+**/Migrations/
+
+# Ignorar archivos de configuración sensibles de cadena de conexión
+appsettings.json
+appsettings.*.json
