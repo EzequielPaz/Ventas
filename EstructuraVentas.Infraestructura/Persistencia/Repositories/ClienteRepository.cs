@@ -1,4 +1,6 @@
 ﻿using EstructuraVentas.Dominio;
+using EstructuraVentas.Dominio.Commons.Enums;
+
 using EstructuraVentas.Infraestructura.Commons.Bases.Request;
 using EstructuraVentas.Infraestructura.Commons.Bases.Response;
 using EstructuraVentas.Infraestructura.Persistencia.Contexto;

@@ -42,30 +42,30 @@ namespace EstructuraVentas.WindowsForms
         private async void PanelAgregarVentas_Load(object sender, EventArgs e)
         {
             dataGridView1.ReadOnly = true;
-           await CargarProductoAsync();
+           //await CargarProductoAsync();
             
         }
 
-        public async Task CargarProductoAsync()
-        {
-            try
-            {
-                _productosOriginales = await _productoServicios.MostrarProductoAsync();
+        //public async Task CargarProductoAsync()
+        //{
+        //    try
+        //    {
+        //        _productosOriginales = await _productoServicios.MostrarProductoAsync();
 
-                var productosParaMostrar = _productosOriginales.Select(p => new
-                {
-                    Código = p.Codigo,
-                    Nombre = p.Nombre,
-                    Stock = p.Stock,
-                    Precio = p.Precio
-                }).ToList();
+        //        var productosParaMostrar = _productosOriginales.Select(p => new
+        //        {
+        //            Código = p.Codigo,
+        //            Nombre = p.Nombre,
+        //            Stock = p.Stock,
+        //            Precio = p.Precio
+        //        }).ToList();
 
-                dataGridView1.DataSource = productosParaMostrar;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar los Productos:\n{ex}");
-            }
-        }
+        //        dataGridView1.DataSource = productosParaMostrar;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"Error al cargar los Productos:\n{ex}");
+        //    }
+        //}
     }
 }

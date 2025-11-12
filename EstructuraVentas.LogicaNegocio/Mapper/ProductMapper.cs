@@ -1,5 +1,8 @@
 ﻿using EstructuraVentas.Dominio;
+using EstructuraVentas.Dominio.Commons.Enums;
+using EstructuraVentas.LogicaNegocio.DTOs.Clientes;
 using EstructuraVentas.LogicaNegocio.DTOs.Producto;
+
 
 
 namespace EstructuraVentas.LogicaNegocio.Mapper
@@ -17,7 +20,7 @@ namespace EstructuraVentas.LogicaNegocio.Mapper
                 Marca = dto.Marca,
                 Precio = dto.Precio,
                 FechaAlta = DateTime.Now,
-                Estado = EstadoProducto.Activo,
+                Estado = Estado.Activo,
                 CategoriaId = dto.CategoriaId
             };
         }
@@ -26,17 +29,29 @@ namespace EstructuraVentas.LogicaNegocio.Mapper
         {
             return new ProductResponseDto
             {
-                Id = producto.IdProducto,
+                IdProducto = producto.IdProducto,
                 Nombre = producto.Nombre,
                 Descripcion = producto.Descripcion,
                 Codigo = producto.Codigo,
-                Stock = producto.Stock,
                 Marca = producto.Marca,
+                Stock = producto.Stock,
                 Precio = producto.Precio,
-                FechaAlta = producto.FechaAlta,
-                //Estado = producto.Estado,
-                CategoriaId = producto.CategoriaId
+                CategoriaId = producto.CategoriaId,
+                CategoriaNombre = producto.Categoria != null ? producto.Categoria.Nombre : string.Empty
             };
+
+        }
+
+        public static void UpdateEntity(this Producto producto, UpdateProductDTO dto)
+        {
+            producto.Nombre = dto.Nombre;
+            producto.Descripcion = dto.Descripcion;
+            producto.Codigo = dto.Codigo;
+            producto.Marca = dto.Marca;
+            producto.Precio = dto.Precio;
+            producto.Stock = dto.Stock;
+            producto.CategoriaId = dto.CategoriaId;
+
         }
     }
 }

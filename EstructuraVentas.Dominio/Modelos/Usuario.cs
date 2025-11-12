@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using EstructuraVentas.Dominio.Commons.Enums;
+
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,10 +43,5 @@ namespace EstructuraVentas.Dominio.Modelos
         Empleado
     }
 
-    public enum Estado
-    {
-        Activo,
-        Inactivo,
-        Bloqueado
-    }
+    
 }

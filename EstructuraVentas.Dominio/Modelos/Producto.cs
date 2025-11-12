@@ -1,6 +1,8 @@
 ﻿using EstructuraVentas.Dominio.Modelos;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using EstructuraVentas.Dominio.Commons.Enums;
+
 
 namespace EstructuraVentas.Dominio
 {
@@ -12,37 +14,32 @@ namespace EstructuraVentas.Dominio
 
         [Required, StringLength(100)]
         
-        public string Nombre { get; set; }
+        public string? Nombre { get; set; }
 
-        public string Descripcion { get; set; }
+        public string? Descripcion { get; set; }
 
         [Required, StringLength(50)]
-        public string Codigo { get; set; }
+        public string? Codigo { get; set; }
 
         [Range(0, int.MaxValue)]
         public int Stock { get; set; }
 
-        public string Marca { get; set; }
+        public string? Marca { get; set; }
 
         [Range(0, double.MaxValue)]
         public decimal Precio { get; set; }
 
         public DateTime FechaAlta { get; set; } = DateTime.Now;
 
-        public EstadoProducto Estado { get; set; } = EstadoProducto.Activo;
+        public Estado Estado { get; set; } = Estado.Activo;
 
         // Clave foránea
         public int CategoriaId { get; set; }
 
         // Propiedad de navegación
         [ForeignKey("CategoriaId")]
-        public Categoria Categoria { get; set; }
+        public Categoria? Categoria { get; set; }
     }
 
-    public enum EstadoProducto
-    {
-        Activo,
-        Inactivo,
-        Bloqueado
-    }
+    
 }

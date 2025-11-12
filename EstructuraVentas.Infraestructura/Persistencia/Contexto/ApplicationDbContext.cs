@@ -64,6 +64,10 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Contexto
 
             modelBuilder.Entity<Venta>()
                 .HasKey(c => c.IdVentas);
+
+            modelBuilder.Entity<Venta>()
+       .Property(v => v.Precio)
+       .HasPrecision(10, 2);
         }
     }
 

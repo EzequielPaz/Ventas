@@ -1,6 +1,9 @@
-﻿using EstructuraVentas.Dominio.Modelos;
+﻿using EstructuraVentas.Dominio.Commons.Enums;
+using EstructuraVentas.Dominio.Modelos;
 using EstructuraVentas.LogicaNegocio.Servicios;
 using Microsoft.Extensions.DependencyInjection;
+using EstructuraVentas.Dominio.Commons.Enums;
+
 
 namespace EstructuraVentas.WindowsForms
 {
