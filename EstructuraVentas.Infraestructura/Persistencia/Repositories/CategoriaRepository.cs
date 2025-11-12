@@ -1,5 +1,7 @@
-﻿using EstructuraVentas.Dominio.Modelos;
+﻿using EstructuraVentas.Dominio;
+using EstructuraVentas.Dominio.Modelos;
 using EstructuraVentas.Infraestructura.Persistencia.Contexto;
+using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,28 +11,34 @@ using System.Threading.Tasks;
 
 namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
 {
-    public class CategoriaRepository : ICategoriaRepository
+    public class CategoriaRepository : GenericRepository<Categoria>
     {
-        private readonly ApplicationDbContext _context;
 
-        public CategoriaRepository(ApplicationDbContext context)
+        public CategoriaRepository(ApplicationDbContext context) : base(context) { }
+
+
+        // Obtener Categoria por ID
+        public async Task<Categoria?> GetCategoriaById(int id)
         {
-            _context = context;
+            return await GetCategoriaById(id);
         }
 
-        public async Task agregarCategoriaAsync(Categoria categoria)
+        // Registrar Categoria (sin SaveChanges, lo hace UnitOfWork)
+        public async Task RegisterCategoria(Categoria categoria)
         {
-            await _context.Categorias.AddAsync(categoria);
+            await AddAsync(categoria);
         }
 
-        public async Task guardarCambiosAsync()
+        // Editar Categoria (sin SaveChanges, lo hace UnitOfWork)
+        public void EditCategoria(Categoria categoria)
         {
-            await _context.SaveChangesAsync(); 
+            Update(categoria);
         }
 
-        public async Task<List<Categoria>> ObtenerTodas()
+        // Eliminar Categoria (sin SaveChanges, lo hace UnitOfWork)
+        public void DeleteCategoria(Categoria categoria)
         {
-            return await _context.Categorias.ToListAsync();
+            Remove(categoria);
         }
 
     }

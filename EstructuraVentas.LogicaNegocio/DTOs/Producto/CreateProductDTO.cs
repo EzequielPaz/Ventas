@@ -1,5 +1,7 @@
 ﻿using EstructuraVentas.Dominio.Modelos;
 using System.ComponentModel.DataAnnotations.Schema;
+using CategoriaModel = EstructuraVentas.Dominio.Modelos.Categoria;
+
 
 namespace EstructuraVentas.LogicaNegocio.DTOs.Producto
 {
@@ -21,6 +23,7 @@ namespace EstructuraVentas.LogicaNegocio.DTOs.Producto
 
         // Propiedad de navegación
         [ForeignKey("CategoriaId")]
-        public Categoria Categoria { get; set; }
+        public CategoriaModel Categoria { get; set; }
+
     }
 }

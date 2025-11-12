@@ -1,88 +1,64 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EstructuraVentas.Dominio;
-using Microsoft.EntityFrameworkCore;
-using EstructuraVentas.Dominio;
+﻿using EstructuraVentas.Dominio;
+using EstructuraVentas.Infraestructura.Commons.Bases.Request;
+using EstructuraVentas.Infraestructura.Commons.Bases.Response;
 using EstructuraVentas.Infraestructura.Persistencia.Contexto;
-
+using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
+using System.Linq.Expressions;
+using EstructuraVentas.Dominio.Commons.Enums;
 
 namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
 {
-    public class ProductoRepository : IProductoRepository
+    public class ProductoRepository : GenericRepository<Producto>, IProductRepository
     {
-        private readonly ApplicationDbContext _context;
-
-        public ProductoRepository(ApplicationDbContext context)
+        public ProductoRepository(ApplicationDbContext context) : base(context)
         {
-            _context = context;
         }
 
-        // Agrega un nuevo producto
-        public async Task AgregarProductoAsync(Producto producto)
+        // Listado con filtros y paginación
+        public async Task<BaseEntityResponse<Producto>> ListProductos(BaseFilterRequest filters)
         {
-            if (producto == null)
-                throw new ArgumentNullException(nameof(producto), "El producto no puede ser nulo.");
+            // Normalizamos filtros
+            string texto = filters.TextFilter?.Trim().ToLower();
+            Estado? estado = filters.StateFilter.HasValue
+                ? (Estado?)filters.StateFilter.Value
+                : null;
 
-            try
-            {
-                _context.Productos.Add(producto);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Error al agregar el producto a la base de datos.", ex);
-            }
+            // Construimos expresión de filtrado
+            Expression<Func<Producto, bool>> filtro = p =>
+                (string.IsNullOrEmpty(texto) ||
+                    p.Nombre.ToLower().Contains(texto) ||
+                    (p.Descripcion != null && p.Descripcion.ToLower().Contains(texto)) ||
+                    (p.Marca != null && p.Marca.ToLower().Contains(texto)) ||
+                    p.Codigo.ToLower().Contains(texto)) &&
+                (!estado.HasValue || p.Estado == estado.Value);
+
+            // Llamada al método genérico
+            return await ListAsync(filters, filtro);
         }
 
-        // Devuelve la lista de productos sin seguimiento (lectura)
-        public async Task<List<Producto>> MostrarProductoAsync()
+        // Obtener cliente por ID
+        public async Task<Producto?> GetProductById(int id)
         {
-            return await _context.Productos
-                .AsNoTracking()
-                .ToListAsync();
+            return await GetByIdAsync(id);
         }
 
-        // Devuelve un producto por ID
-        public async Task<Producto?> ObtenerPorIdProductoAsync(int IdProducto)
+        // Registrar producto (sin SaveChanges, lo hace UnitOfWork)
+        public async Task RegisterProduct(Producto producto)
         {
-            return await _context.Productos
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.IdProducto == IdProducto);
+            await AddAsync(producto);
         }
 
-        // Elimina un producto por ID
-        public async Task EliminarProductoAsync(int IdProducto)
+        // Editar Producto (sin SaveChanges, lo hace UnitOfWork)
+        public void EditProduct(Producto product)
         {
-            var producto = await _context.Productos.FindAsync(IdProducto);
-            if (producto != null)
-            {
-                _context.Productos.Remove(producto);
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-                throw new InvalidOperationException("No se encontró el producto a eliminar.");
-            }
+            Update(product);
         }
 
-        // Modifica un producto existente
-        public async Task ModificarProductoAsync(Producto producto)
+        // Eliminar producto (sin SaveChanges, lo hace UnitOfWork)
+        public void DeleteClient(Producto product)
         {
-            var existente = await _context.Productos.FindAsync(producto.IdProducto);
-            if (existente != null)
-            {
-                _context.Entry(existente).CurrentValues.SetValues(producto);
-            }
-            else
-            {
-                // Esto no debería ocurrir normalmente, pero cubrimos el caso
-                _context.Productos.Update(producto);
-            }
-
-            await _context.SaveChangesAsync();
+            Remove(product);
         }
+
     }
 }

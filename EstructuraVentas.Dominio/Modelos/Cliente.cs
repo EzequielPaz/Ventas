@@ -1,4 +1,6 @@
-﻿namespace EstructuraVentas.Dominio
+﻿using EstructuraVentas.Dominio.Commons.Enums;
+
+namespace EstructuraVentas.Dominio
 {
     public class Cliente
     {
@@ -12,9 +14,5 @@
 
     }
 
-    public enum Estado
-    {
-        Activo = 0,
-        Inactivo = 1
-    }
+   
 }

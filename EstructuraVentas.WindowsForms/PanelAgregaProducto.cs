@@ -11,14 +11,8 @@ namespace EstructuraVentas.WindowsForms
         private readonly IServiceProvider _serviceProvider;
         private readonly CategoriaServicio _categoriaServicio;
         private readonly ProductoServicios _productoServicios;
+
         public event EventHandler ProductoAgregado;
-        private string NombreProductoTexto = string.Empty;
-        private string DescripcionTexto = string.Empty;
-        private string CodigoTexto = string.Empty;
-        private string StockTexto = string.Empty;
-        private string MarcaTexto = string.Empty;
-        private string PrecioTexto = string.Empty;
-        private string CategoriaTexto = string.Empty;
 
         public PanelAgregaProducto(IServiceProvider serviceProvider)
         {
@@ -31,98 +25,91 @@ namespace EstructuraVentas.WindowsForms
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            NombreProductoTexto = textBox1.Text;
+
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            DescripcionTexto = textBox2.Text;
+
         }
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
-            CodigoTexto = textBox3.Text;
+
         }
 
         private void textBox4_TextChanged(object sender, EventArgs e)
         {
-            StockTexto = textBox4.Text;
         }
 
         private void textBox5_TextChanged(object sender, EventArgs e)
         {
-            MarcaTexto = textBox5.Text;
         }
 
         private void textBox6_TextChanged(object sender, EventArgs e)
         {
-            PrecioTexto = textBox6.Text;
         }
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            NombreProductoTexto = textBox1.Text;
-            DescripcionTexto = textBox2.Text;
-            CodigoTexto = textBox3.Text;
-            StockTexto = textBox4.Text;
-            MarcaTexto = textBox5.Text;
-            PrecioTexto = textBox6.Text;
-            CategoriaTexto = textBox7.Text;
-
-            if (string.IsNullOrWhiteSpace(NombreProductoTexto) ||
-                string.IsNullOrWhiteSpace(DescripcionTexto) ||
-                string.IsNullOrWhiteSpace(CodigoTexto) ||
-                string.IsNullOrWhiteSpace(StockTexto) ||
-                string.IsNullOrWhiteSpace(CategoriaTexto) == null)
+            // Validaciones de campos
+            if (string.IsNullOrWhiteSpace(textBox1.Text) ||
+                string.IsNullOrWhiteSpace(textBox2.Text) ||
+                string.IsNullOrWhiteSpace(textBox3.Text) ||
+                string.IsNullOrWhiteSpace(textBox4.Text) ||
+                string.IsNullOrWhiteSpace(textBox5.Text) ||
+                string.IsNullOrWhiteSpace(textBox6.Text))
             {
-                MessageBox.Show("Debes llenar todos los campos");
+                MessageBox.Show("Debes llenar todos los campos.");
                 return;
             }
 
-            if (!int.TryParse(StockTexto, out int stock) || stock < 0)
+            if (!int.TryParse(textBox4.Text, out int stock) || stock < 0)
             {
                 MessageBox.Show("El stock debe ser un número entero positivo.");
                 return;
             }
 
-            if (!int.TryParse(PrecioTexto, out int Precio) || Precio < 0)
+            if (!decimal.TryParse(textBox6.Text, out decimal precio) || precio < 0)
             {
-                MessageBox.Show("El precio debe ser un número entero positivo.");
+                MessageBox.Show("El precio debe ser un número decimal positivo.");
                 return;
             }
 
-            if (!int.TryParse(CategoriaTexto, out int Categoria) || Precio < 0)
+            if (comboBox1.SelectedValue == null)
             {
-                MessageBox.Show("La categoria debe ser un entero.");
+                MessageBox.Show("Debes seleccionar una categoría.");
                 return;
             }
 
+            int categoriaId = (int)comboBox1.SelectedValue;
 
+            // Crear DTO
             var productDTO = new CreateProductDTO
             {
-                Nombre = NombreProductoTexto,
-                Descripcion = DescripcionTexto,
-                Codigo = CodigoTexto,
+                Nombre = textBox1.Text,
+                Descripcion = textBox2.Text,
+                Codigo = textBox3.Text,
                 Stock = stock,
-                Marca = MarcaTexto,
-                Precio = Precio,
-                CategoriaId = Categoria,
-     
+                Marca = textBox5.Text,
+                Precio = precio,
+                CategoriaId = categoriaId
             };
 
             try
             {
                 await _productoServicios.AgregarProducto(productDTO);
                 MessageBox.Show("¡Producto registrado con éxito!");
-                LimpiarTextBox();
+                ProductoAgregado?.Invoke(this, EventArgs.Empty);
+                LimpiarCampos();
                 this.Hide();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al registrar producto: " + ex.Message);
+                MessageBox.Show($"Error al registrar producto: {ex.Message}");
             }
         }
-        private void LimpiarTextBox()
+        private void LimpiarCampos()
         {
             textBox1.Clear();
             textBox2.Clear();
@@ -130,7 +117,7 @@ namespace EstructuraVentas.WindowsForms
             textBox4.Clear();
             textBox5.Clear();
             textBox6.Clear();
-            textBox7.Clear();
+            comboBox1.SelectedIndex = -1;
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -150,13 +137,24 @@ namespace EstructuraVentas.WindowsForms
 
         private async void PanelAgregaProducto_Load(object sender, EventArgs e)
         {
-            var categorias = await _categoriaServicio.ObtenerTodas();
-
-            if (categorias == null || !categorias.Any())
+            try
             {
-                MessageBox.Show("No hay categorías registradas. Debes crear al menos una antes de agregar productos.");
-                this.Hide();
-                return;
+                var categoriasResponse = await _categoriaServicio.MostrarCategoriasAsync();
+
+                if (categoriasResponse == null || categoriasResponse.Records == null || !categoriasResponse.Records.Any())
+                {
+                    MessageBox.Show("No hay categorías registradas. Debes crear al menos una antes de agregar productos.");
+                    this.Hide();
+                    return;
+                }
+
+                comboBox1.DataSource = categoriasResponse.Records;
+                comboBox1.DisplayMember = "Nombre";   // lo que se muestra al usuario
+                comboBox1.ValueMember = "IdCategoria"; // el valor que se usará internamente
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar categorías: {ex.Message}");
             }
 
 
@@ -169,7 +167,11 @@ namespace EstructuraVentas.WindowsForms
 
         private void textBox7_TextChanged(object sender, EventArgs e)
         {
-            CategoriaTexto = textBox6.Text;
+
+        }
+
+        private void comboBox1_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
 
         }
     }

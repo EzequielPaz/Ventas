@@ -126,6 +126,7 @@ namespace EstructuraVentas.WindowsForms
         }
         //--- Fin Lógica Central de Carga y Paginación ---
 
+        // Función para eliminar cliente al hacer clic en el botón Eliminar
         private async void button2_Click(object sender, EventArgs e) // Eliminar
         {
             await EliminarClienteAsync();

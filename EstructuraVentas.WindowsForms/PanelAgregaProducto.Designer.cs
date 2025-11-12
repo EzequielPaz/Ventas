@@ -44,7 +44,7 @@
             label7 = new Label();
             label8 = new Label();
             textBox6 = new TextBox();
-            textBox7 = new TextBox();
+            comboBox1 = new ComboBox();
             SuspendLayout();
             // 
             // label5
@@ -198,13 +198,14 @@
             textBox6.TabIndex = 26;
             textBox6.TextChanged += textBox6_TextChanged;
             // 
-            // textBox7
+            // comboBox1
             // 
-            textBox7.Location = new Point(546, 310);
-            textBox7.Name = "textBox7";
-            textBox7.Size = new Size(121, 23);
-            textBox7.TabIndex = 27;
-            textBox7.TextChanged += textBox7_TextChanged;
+            comboBox1.FormattingEnabled = true;
+            comboBox1.Location = new Point(546, 310);
+            comboBox1.Name = "comboBox1";
+            comboBox1.Size = new Size(121, 23);
+            comboBox1.TabIndex = 27;
+            comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged_1;
             // 
             // PanelAgregaProducto
             // 
@@ -212,7 +213,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightSkyBlue;
             ClientSize = new Size(800, 450);
-            Controls.Add(textBox7);
+            Controls.Add(comboBox1);
             Controls.Add(textBox6);
             Controls.Add(label8);
             Controls.Add(label7);
@@ -254,6 +255,6 @@
         private Label label7;
         private Label label8;
         private TextBox textBox6;
-        private TextBox textBox7;
+        private ComboBox comboBox1;
     }
 }

@@ -42,11 +42,14 @@
             label5 = new Label();
             label7 = new Label();
             comboBox1 = new ComboBox();
+            label8 = new Label();
+            label9 = new Label();
+            textBox6 = new TextBox();
             SuspendLayout();
             // 
             // button1
             // 
-            button1.Location = new Point(143, 368);
+            button1.Location = new Point(142, 394);
             button1.Name = "button1";
             button1.Size = new Size(75, 23);
             button1.TabIndex = 19;
@@ -66,7 +69,7 @@
             // 
             // textBox5
             // 
-            textBox5.Location = new Point(539, 283);
+            textBox5.Location = new Point(538, 263);
             textBox5.Name = "textBox5";
             textBox5.Size = new Size(100, 23);
             textBox5.TabIndex = 32;
@@ -76,7 +79,7 @@
             // 
             label6.AutoSize = true;
             label6.BackColor = SystemColors.Info;
-            label6.Location = new Point(143, 283);
+            label6.Location = new Point(142, 263);
             label6.Name = "label6";
             label6.Size = new Size(43, 15);
             label6.TabIndex = 31;
@@ -84,7 +87,7 @@
             // 
             // textBox4
             // 
-            textBox4.Location = new Point(539, 244);
+            textBox4.Location = new Point(538, 224);
             textBox4.Name = "textBox4";
             textBox4.Size = new Size(100, 23);
             textBox4.TabIndex = 30;
@@ -92,7 +95,7 @@
             // 
             // textBox3
             // 
-            textBox3.Location = new Point(539, 207);
+            textBox3.Location = new Point(538, 187);
             textBox3.Name = "textBox3";
             textBox3.Size = new Size(100, 23);
             textBox3.TabIndex = 29;
@@ -100,7 +103,7 @@
             // 
             // textBox2
             // 
-            textBox2.Location = new Point(539, 166);
+            textBox2.Location = new Point(538, 146);
             textBox2.Name = "textBox2";
             textBox2.Size = new Size(100, 23);
             textBox2.TabIndex = 28;
@@ -108,7 +111,7 @@
             // 
             // textBox1
             // 
-            textBox1.Location = new Point(539, 127);
+            textBox1.Location = new Point(538, 107);
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(100, 23);
             textBox1.TabIndex = 27;
@@ -118,7 +121,7 @@
             // 
             label4.AutoSize = true;
             label4.BackColor = SystemColors.Info;
-            label4.Location = new Point(143, 244);
+            label4.Location = new Point(142, 224);
             label4.Name = "label4";
             label4.Size = new Size(36, 15);
             label4.TabIndex = 26;
@@ -128,7 +131,7 @@
             // 
             label3.AutoSize = true;
             label3.BackColor = SystemColors.Info;
-            label3.Location = new Point(143, 210);
+            label3.Location = new Point(142, 190);
             label3.Name = "label3";
             label3.Size = new Size(46, 15);
             label3.TabIndex = 25;
@@ -138,7 +141,7 @@
             // 
             label2.AutoSize = true;
             label2.BackColor = SystemColors.Info;
-            label2.Location = new Point(143, 174);
+            label2.Location = new Point(142, 154);
             label2.Name = "label2";
             label2.Size = new Size(69, 15);
             label2.TabIndex = 24;
@@ -148,7 +151,7 @@
             // 
             label5.AutoSize = true;
             label5.BackColor = SystemColors.Info;
-            label5.Location = new Point(143, 135);
+            label5.Location = new Point(142, 115);
             label5.Name = "label5";
             label5.Size = new Size(119, 15);
             label5.TabIndex = 23;
@@ -158,7 +161,7 @@
             // 
             label7.AutoSize = true;
             label7.BackColor = SystemColors.Info;
-            label7.Location = new Point(143, 326);
+            label7.Location = new Point(142, 331);
             label7.Name = "label7";
             label7.Size = new Size(58, 15);
             label7.TabIndex = 33;
@@ -167,11 +170,38 @@
             // comboBox1
             // 
             comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(539, 323);
+            comboBox1.Location = new Point(538, 328);
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(121, 23);
             comboBox1.TabIndex = 34;
             comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.BackColor = SystemColors.Info;
+            label8.Location = new Point(142, 130);
+            label8.Name = "label8";
+            label8.Size = new Size(0, 15);
+            label8.TabIndex = 35;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.BackColor = SystemColors.Info;
+            label9.Location = new Point(142, 292);
+            label9.Name = "label9";
+            label9.Size = new Size(40, 15);
+            label9.TabIndex = 36;
+            label9.Text = "Precio";
+            // 
+            // textBox6
+            // 
+            textBox6.Location = new Point(538, 292);
+            textBox6.Name = "textBox6";
+            textBox6.Size = new Size(100, 23);
+            textBox6.TabIndex = 37;
+            textBox6.TextChanged += textBox6_TextChanged;
             // 
             // PanelModificarProducto
             // 
@@ -179,6 +209,9 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightSkyBlue;
             ClientSize = new Size(800, 450);
+            Controls.Add(textBox6);
+            Controls.Add(label9);
+            Controls.Add(label8);
             Controls.Add(comboBox1);
             Controls.Add(label7);
             Controls.Add(textBox5);
@@ -216,5 +249,8 @@
         private Label label5;
         private Label label7;
         private ComboBox comboBox1;
+        private Label label8;
+        private Label label9;
+        private TextBox textBox6;
     }
 }

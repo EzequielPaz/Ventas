@@ -30,9 +30,9 @@
         {
             label1 = new Label();
             dataGridView1 = new DataGridView();
-            button1 = new Button();
-            button2 = new Button();
-            button3 = new Button();
+            AgregarProducto = new Button();
+            ModificarProducto = new Button();
+            EliminarProducto = new Button();
             button4 = new Button();
             textBox1 = new TextBox();
             label2 = new Label();
@@ -40,6 +40,9 @@
             iconButton2 = new FontAwesome.Sharp.IconButton();
             button5 = new Button();
             button6 = new Button();
+            botonAnterior = new Button();
+            botonSiguiente = new Button();
+            LabelPaginacion = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
@@ -65,39 +68,39 @@
             dataGridView1.TabIndex = 1;
             dataGridView1.CellContentClick += dataGridView1_CellContentClick;
             // 
-            // button1
+            // AgregarProducto
             // 
-            button1.Location = new Point(501, 379);
-            button1.Name = "button1";
-            button1.Size = new Size(75, 23);
-            button1.TabIndex = 2;
-            button1.Text = "Agregar";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            AgregarProducto.Location = new Point(501, 408);
+            AgregarProducto.Name = "AgregarProducto";
+            AgregarProducto.Size = new Size(75, 23);
+            AgregarProducto.TabIndex = 2;
+            AgregarProducto.Text = "Agregar";
+            AgregarProducto.UseVisualStyleBackColor = true;
+            AgregarProducto.Click += button1_Click;
             // 
-            // button2
+            // ModificarProducto
             // 
-            button2.Location = new Point(582, 379);
-            button2.Name = "button2";
-            button2.Size = new Size(75, 23);
-            button2.TabIndex = 3;
-            button2.Text = "Modificar";
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
+            ModificarProducto.Location = new Point(582, 408);
+            ModificarProducto.Name = "ModificarProducto";
+            ModificarProducto.Size = new Size(75, 23);
+            ModificarProducto.TabIndex = 3;
+            ModificarProducto.Text = "Modificar";
+            ModificarProducto.UseVisualStyleBackColor = true;
+            ModificarProducto.Click += button2_Click;
             // 
-            // button3
+            // EliminarProducto
             // 
-            button3.Location = new Point(663, 379);
-            button3.Name = "button3";
-            button3.Size = new Size(75, 23);
-            button3.TabIndex = 4;
-            button3.Text = "Eliminar";
-            button3.UseVisualStyleBackColor = true;
-            button3.Click += button3_Click;
+            EliminarProducto.Location = new Point(663, 408);
+            EliminarProducto.Name = "EliminarProducto";
+            EliminarProducto.Size = new Size(75, 23);
+            EliminarProducto.TabIndex = 4;
+            EliminarProducto.Text = "Eliminar";
+            EliminarProducto.UseVisualStyleBackColor = true;
+            EliminarProducto.Click += button3_Click;
             // 
             // button4
             // 
-            button4.Location = new Point(90, 379);
+            button4.Location = new Point(90, 408);
             button4.Name = "button4";
             button4.Size = new Size(75, 23);
             button4.TabIndex = 5;
@@ -157,7 +160,7 @@
             // 
             // button6
             // 
-            button6.Location = new Point(171, 379);
+            button6.Location = new Point(171, 408);
             button6.Name = "button6";
             button6.Size = new Size(115, 23);
             button6.TabIndex = 17;
@@ -165,11 +168,43 @@
             button6.UseVisualStyleBackColor = true;
             button6.Click += button6_Click;
             // 
+            // botonAnterior
+            // 
+            botonAnterior.Location = new Point(561, 368);
+            botonAnterior.Name = "botonAnterior";
+            botonAnterior.Size = new Size(75, 23);
+            botonAnterior.TabIndex = 18;
+            botonAnterior.Text = "Anterior";
+            botonAnterior.UseVisualStyleBackColor = true;
+            botonAnterior.Click += button7_Click;
+            // 
+            // botonSiguiente
+            // 
+            botonSiguiente.Location = new Point(663, 368);
+            botonSiguiente.Name = "botonSiguiente";
+            botonSiguiente.Size = new Size(75, 23);
+            botonSiguiente.TabIndex = 19;
+            botonSiguiente.Text = "Siguiente";
+            botonSiguiente.UseVisualStyleBackColor = true;
+            botonSiguiente.Click += button8_Click;
+            // 
+            // LabelPaginacion
+            // 
+            LabelPaginacion.AutoSize = true;
+            LabelPaginacion.Location = new Point(478, 374);
+            LabelPaginacion.Name = "LabelPaginacion";
+            LabelPaginacion.Size = new Size(38, 15);
+            LabelPaginacion.TabIndex = 20;
+            LabelPaginacion.Text = "label3";
+            // 
             // PanelProductos
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1214, 621);
+            Controls.Add(LabelPaginacion);
+            Controls.Add(botonSiguiente);
+            Controls.Add(botonAnterior);
             Controls.Add(button6);
             Controls.Add(button5);
             Controls.Add(textBox1);
@@ -177,9 +212,9 @@
             Controls.Add(comboBox1);
             Controls.Add(iconButton2);
             Controls.Add(button4);
-            Controls.Add(button3);
-            Controls.Add(button2);
-            Controls.Add(button1);
+            Controls.Add(EliminarProducto);
+            Controls.Add(ModificarProducto);
+            Controls.Add(AgregarProducto);
             Controls.Add(dataGridView1);
             Controls.Add(label1);
             Name = "PanelProductos";
@@ -194,9 +229,9 @@
 
         private Label label1;
         private DataGridView dataGridView1;
-        private Button button1;
-        private Button button2;
-        private Button button3;
+        private Button AgregarProducto;
+        private Button ModificarProducto;
+        private Button EliminarProducto;
         private Button button4;
         private TextBox textBox1;
         private Label label2;
@@ -204,5 +239,8 @@
         private FontAwesome.Sharp.IconButton iconButton2;
         private Button button5;
         private Button button6;
+        private Button botonAnterior;
+        private Button botonSiguiente;
+        private Label LabelPaginacion;
     }
 }

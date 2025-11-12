@@ -45,11 +45,11 @@ namespace EstructuraVentas.WindowsForms
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddScoped<IClienteRepository, ClienteRepository>();
-            services.AddScoped<IProductoRepository, ProductoRepository>();
+            services.AddScoped<IProductRepository, ProductoRepository>();
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             services.AddScoped<IProveedorRepository, ProveedorRepository>();
-            services.AddScoped<ICategoriaRepository, CategoriaRepository>();
-            services.AddScoped<IVentasRespository, VentasRepository>();
+            services.AddScoped<CategoriaRepository>();
+//services.AddScoped<IVentasRespository, VentaRepository>();
 
             services.AddScoped<ClienteServicios>();
             services.AddScoped<ProductoServicios>();

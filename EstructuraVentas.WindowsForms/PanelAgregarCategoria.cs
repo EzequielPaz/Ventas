@@ -62,7 +62,7 @@ namespace EstructuraVentas.WindowsForms
             try
             {
                 var categoriaServicio = _serviceProvider.GetService<CategoriaServicio>();
-                await categoriaServicio.AgregarCategoria(nuevaCategoria);
+                await categoriaServicio.AgregarCategoriaAsync(nuevaCategoria);
                 MessageBox.Show("¡Categoria registrada con éxito!");
                 LimpiarCampos();
                 this.Hide();
