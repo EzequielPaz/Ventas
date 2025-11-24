@@ -1,9 +1,14 @@
 ﻿using EstructuraVentas.Dominio.Commons.Enums;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace EstructuraVentas.Dominio
 {
     public class Cliente
     {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+
         public int IDClientes { get; set; }
         public string? NombreCliente { get; set; }
         public string? Email { get; set; }

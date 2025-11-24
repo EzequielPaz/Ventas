@@ -18,11 +18,20 @@ namespace EstructuraVentas.WindowsForms
             
             ApplicationConfiguration.Initialize();
 
+            //var configuration = new ConfigurationBuilder()
+            //    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            //    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            //    .Build();
+
+            //Registramos configuracion mongoDB
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
+            // REGISTRAR IConfiguration
+            //services.AddSingleton<IConfiguration>(configuration);
+            
 
             // Configuramos el contenedor de servicios
             var services = new ServiceCollection();
@@ -34,16 +43,24 @@ namespace EstructuraVentas.WindowsForms
         }
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
+            // Registrar IConfiguration
+            services.AddSingleton<IConfiguration>(configuration);
+
+            //Registrar mongoDBContext
+            services.AddSingleton<MongoDbContext>();
+
             // Cadena de conexión
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            var connectionString = configuration.GetConnectionString("MongoDb");
 
             // DbContext
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            //services.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseSqlServer(connectionString));                          Se comenta apra intentar migrar a MongoDB
+            
+            
 
             // Repositorios y servicios
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+            
             services.AddScoped<IClienteRepository, ClienteRepository>();
             services.AddScoped<IProductRepository, ProductoRepository>();
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
@@ -53,11 +70,15 @@ namespace EstructuraVentas.WindowsForms
 
             services.AddScoped<ClienteServicios>();
             services.AddScoped<ProductoServicios>();
+            //services.AddScoped<UsuarioServicio>();
             services.AddScoped<UsuarioServicio>();
+
+            //services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+
             services.AddScoped<ProveedorServicio>();
             services.AddScoped<CategoriaServicio>();
             services.AddScoped<VentaServicio>();
-
+            
             services.AddScoped<PanelClientes>();
             services.AddScoped<PanelProductos>();
             services.AddScoped<PanelLogin>();

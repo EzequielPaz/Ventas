@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using EstructuraVentas.LogicaNegocio.Servicios;
 
 namespace EstructuraVentas.WindowsForms
 {
@@ -53,9 +54,9 @@ namespace EstructuraVentas.WindowsForms
         //Cerrar sesion
         private void button2_Click(object sender, EventArgs e)
         {
-            PanelLogin panelLoginForm = new PanelLogin(this._serviceProvider);
-            panelLoginForm.Show();
-            this.Hide();
+            _loginForm.Show();
+            _loginForm.Activate();
+            this.Close(); // o this.Hide();
 
         }
 

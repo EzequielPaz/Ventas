@@ -18,16 +18,23 @@ namespace EstructuraVentas.WindowsForms
         private string contraseñaTexto = string.Empty;
         private readonly UsuarioServicio _usuarioServicio;
         private readonly IServiceProvider _serviceProvider;
+        //private readonly IUsuarioServicio _usuarioServicio;
+        //public PanelLogin(IServiceProvider serviceProvider)
+        //{
+        //    InitializeComponent();
+        //    _serviceProvider = serviceProvider;
+        //    _usuarioServicio = _serviceProvider.GetRequiredService<UsuarioServicio>();
+        //    textBox1.UseSystemPasswordChar = true;
+        //    this.CenterToScreen();
+        //}
 
-        public PanelLogin(IServiceProvider serviceProvider)
+        public PanelLogin(UsuarioServicio usuarioServicio)
         {
+            _usuarioServicio = usuarioServicio;
             InitializeComponent();
-            _serviceProvider = serviceProvider;
-            _usuarioServicio = _serviceProvider.GetRequiredService<UsuarioServicio>();
             textBox1.UseSystemPasswordChar = true;
             this.CenterToScreen();
         }
-
         private async void button1_Click(object sender, EventArgs e)
         {
             string nombreUsuarioTexto = textBox2.Text;

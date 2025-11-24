@@ -15,7 +15,8 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
 
         public UsuarioServicio(IUsuarioRepository usuarioRepository)
         {
-            _usuarioRepository = usuarioRepository ?? throw new ArgumentNullException(nameof(_usuarioRepository));
+            //_usuarioRepository = usuarioRepository ?? throw new ArgumentNullException(nameof(_usuarioRepository));
+            _usuarioRepository = usuarioRepository ?? throw new ArgumentNullException(nameof(usuarioRepository));
 
         }
 
