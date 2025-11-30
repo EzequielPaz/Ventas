@@ -1,24 +1,19 @@
-﻿using EstructuraVentas.Dominio;
-using EstructuraVentas.LogicaNegocio.DTOs.Clientes;
+﻿using EstructuraVentas.LogicaNegocio.DTOs.Clientes;
 using EstructuraVentas.LogicaNegocio.Servicios;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace EstructuraVentas.WindowsForms
 {
     public partial class PanelModificarCliente : Form
     {
-        private readonly int _idCliente;
+        private readonly string _idCliente;
         private readonly IServiceProvider _serviceProvider;
 
         // Evento para notificar al formulario padre que el cliente se modificó
         public event EventHandler ClienteModificado;
 
-        public PanelModificarCliente(IServiceProvider serviceProvider, int idCliente)
+        public PanelModificarCliente(IServiceProvider serviceProvider, string idCliente)
         {
             InitializeComponent();
             _serviceProvider = serviceProvider;
@@ -40,7 +35,7 @@ namespace EstructuraVentas.WindowsForms
             }
         }
 
-        private async Task CargarDatosClientes(int id)
+        private async Task CargarDatosClientes(string id)
         {
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -93,7 +88,7 @@ namespace EstructuraVentas.WindowsForms
                     var clienteServiciosScoped = scope.ServiceProvider.GetRequiredService<ClienteServicios>();
                     await clienteServiciosScoped.ModificarClienteAsync(dto);
 
-                   
+
 
                     MessageBox.Show("Cliente actualizado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
 

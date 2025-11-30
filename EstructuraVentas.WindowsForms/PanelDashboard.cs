@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using EstructuraVentas.LogicaNegocio.Servicios;
 
 namespace EstructuraVentas.WindowsForms
 {
@@ -16,12 +17,14 @@ namespace EstructuraVentas.WindowsForms
     {
         private readonly IServiceProvider _serviceProvider;
         private Form _loginForm;
-        public PanelDashboard(IServiceProvider serviceProvider, Form loginForm)
+        public PanelDashboard(IServiceProvider serviceProvider, PanelLogin loginForm)
         {
             InitializeComponent();
-            _serviceProvider = serviceProvider;
             this.CenterToScreen();
+
+            _serviceProvider = serviceProvider;
             _loginForm = loginForm;
+
         }
 
         private void PanelDashboard_Load(object sender, EventArgs e)
@@ -53,9 +56,9 @@ namespace EstructuraVentas.WindowsForms
         //Cerrar sesion
         private void button2_Click(object sender, EventArgs e)
         {
-            PanelLogin panelLoginForm = new PanelLogin(this._serviceProvider);
-            panelLoginForm.Show();
-            this.Hide();
+            _loginForm.Show();
+            _loginForm.Activate();
+            this.Close(); // o this.Hide();
 
         }
 

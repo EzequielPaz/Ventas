@@ -9,16 +9,15 @@ namespace EstructuraVentas.WindowsForms
 {
     public partial class PanelClientes : Form
     {
-        private readonly IServiceProvider _serviceProvider;
-        private List<Cliente> _clientesOriginales;
-        private ClienteFilterRequest _filtroActual = new ClienteFilterRequest(); // Almacena los filtros
-
-
+        private readonly IServiceProvider _serviceProvider; 
+        private List<Cliente> _clientesOriginales; private ClienteFilterRequest _filtroActual = new ClienteFilterRequest(); // Almacena los filtros 
+        
         // --- Variables de Paginación ---
-        private int _paginaActual = 1;
-        private const int _tamanioPagina = 10; // Tamaño de página fijo
+        private int _paginaActual = 1; 
+        private const int _tamanioPagina = 10; // Tamaño de página fijo private int _totalPaginas = 0; 
         private int _totalPaginas = 0;
         // ---------------------------------
+
 
         public PanelClientes(IServiceProvider serviceProvider)
         {
@@ -38,7 +37,7 @@ namespace EstructuraVentas.WindowsForms
             if (e.RowIndex >= 0)
             {
                 DataGridViewRow fila = dataGridView1.Rows[e.RowIndex];
-                int idCliente = Convert.ToInt32(fila.Cells["IDClientes"].Value);
+                string idCliente = fila.Cells["IDClientes"].Value?.ToString();
             }
         }
 
@@ -61,8 +60,15 @@ namespace EstructuraVentas.WindowsForms
         {
             if (dataGridView1.SelectedRows.Count > 0)
             {
-                DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
-                int idCliente = Convert.ToInt32(filaSeleccionada.Cells["IDClientes"].Value);
+                var filaSeleccionada = dataGridView1.SelectedRows[0];
+
+                string idCliente = filaSeleccionada.Cells["IDClientes"].Value?.ToString();
+
+                if (string.IsNullOrEmpty(idCliente))
+                {
+                    MessageBox.Show("El ID del cliente no es válido.");
+                    return;
+                }
 
                 var panelModificarCliente = new PanelModificarCliente(_serviceProvider, idCliente);
                 panelModificarCliente.ShowDialog();
@@ -71,6 +77,7 @@ namespace EstructuraVentas.WindowsForms
             {
                 MessageBox.Show("Por favor, seleccione un cliente");
             }
+
         }
 
         //--- Lógica Central de Carga y Paginación ---
@@ -132,14 +139,14 @@ namespace EstructuraVentas.WindowsForms
             await EliminarClienteAsync();
         }
 
-        // Funcion para eliminar (código omitido por brevedad, asumo que está correcto)
+        // Funcion para eliminar un cliente
         public async Task EliminarClienteAsync()
         {
             // ... (su código de eliminación) ...
             if (dataGridView1.SelectedRows.Count > 0)
             {
                 DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
-                int idCliente = Convert.ToInt32(filaSeleccionada.Cells["IDClientes"].Value);
+                string idCliente = filaSeleccionada.Cells["IDClientes"].Value?.ToString();
 
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -208,7 +215,7 @@ namespace EstructuraVentas.WindowsForms
             _paginaActual = 1;
             await CargarClientesAsync();
 
-            MessageBox.Show("Filtros aplicados correctamente.");
+            //MessageBox.Show("Filtros aplicados correctamente.");
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e) { }

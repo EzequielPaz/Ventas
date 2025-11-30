@@ -1,4 +1,5 @@
 ﻿using EstructuraVentas.Dominio.Modelos;
+using EstructuraVentas.LogicaNegocio.DTOs.Categoria;
 using EstructuraVentas.LogicaNegocio.Servicios;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -41,44 +42,49 @@ namespace EstructuraVentas.WindowsForms
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            var nombreTexto = textBox1.Text;
-            var descripcion = richTextBox1.Text;
+            //var nombreTexto = textBox1.Text;
+            //var descripcion = richTextBox1.Text;
 
-            //Validar que todos los campos estén completos
-            if (string.IsNullOrEmpty(nombreTexto) ||
-                string.IsNullOrEmpty(descripcion))
-             
-            {
-                MessageBox.Show("Debes llenar todos los campos.");
-                return;
-            }
+            ////Validar que todos los campos estén completos
+            //if (string.IsNullOrEmpty(nombreTexto) ||
+            //    string.IsNullOrEmpty(descripcion))
 
-            var nuevaCategoria = new Categoria
-            {
-                Nombre = nombreTexto,
-                Descripcion = descripcion
-            };
+            //{
+            //    MessageBox.Show("Debes llenar todos los campos.");
+            //    return;
+            //}
 
-            try
-            {
-                var categoriaServicio = _serviceProvider.GetService<CategoriaServicio>();
-                await categoriaServicio.AgregarCategoriaAsync(nuevaCategoria);
-                MessageBox.Show("¡Categoria registrada con éxito!");
-                LimpiarCampos();
-                this.Hide();
+            ////var nuevaCategoria = new Categoria
+            //var nuevaCategoriaDTO = new CreateCategoriaDTO
+            //{
+            //    Nombre = nombreTexto,
+            //    Descripcion = descripcion
+            //};
 
-            }
+            //try
+            //{
+            //    var categoriaServicio = _serviceProvider.GetService<CategoriaServicio>();
+            //    //await categoriaServicio.AgregarCategoriaAsync(nuevaCategoria);
+            //    await categoriaServicio.AgregarCategoriaAsync(nuevaCategoriaDTO);
 
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al registrar categoria: " + ex.Message);
-            }
+
+            //    MessageBox.Show("¡Categoria registrada con éxito!");
+            //    LimpiarCampos();
+            //    this.Hide();
+
+            //}
+
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show("Error al registrar categoria: " + ex.Message);
+            //}
         }
 
-        private void LimpiarCampos()
-        {
-            textBox1.Clear();
-            richTextBox1.Clear();
-        }
+        //    private void LimpiarCampos()
+        //    {
+        //        textBox1.Clear();
+        //        richTextBox1.Clear();
+        //    }
+        //}
     }
 }
