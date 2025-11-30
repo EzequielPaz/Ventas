@@ -31,7 +31,7 @@ namespace EstructuraVentas.WindowsForms
         //load
         private async void PanelEditarProveedor_Load(object sender, EventArgs e)
         {
-            await CargarDatosProveedor(_proveedorId);
+            //await CargarDatosProveedor(_proveedorId);
 
         }
 
@@ -62,20 +62,20 @@ namespace EstructuraVentas.WindowsForms
         //BOTON GUARDAR MODIFICACION
         private async void button1_Click(object sender, EventArgs e)
         {
-            try
-            {
-                var proveedorActualizado = ObtenerProveedorDesdeFormulario();
+            //try
+            //{
+            //    var proveedorActualizado = ObtenerProveedorDesdeFormulario();
 
-                // Llamás al servicio para actualizar
-                await _proveedorServicio.ActualizarProveedorAsync(proveedorActualizado);
+            //    // Llamás al servicio para actualizar
+            //    await _proveedorServicio.ActualizarProveedorAsync(proveedorActualizado);
 
-                MessageBox.Show("Proveedor actualizado correctamente.");
-                this.Close();  // Cerrás el formulario si querés
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al actualizar proveedor: {ex.Message}");
-            }
+            //    MessageBox.Show("Proveedor actualizado correctamente.");
+            //    this.Close();  // Cerrás el formulario si querés
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show($"Error al actualizar proveedor: {ex.Message}");
+            //}
         }
 
         //BOTON CANCELAR
@@ -86,39 +86,39 @@ namespace EstructuraVentas.WindowsForms
         }
 
         //FUNCION QUE CARGA DATOS DEL PROVEEDOR AL HACER CLICK EN LA FILA 
-        public async Task CargarDatosProveedor(int id)
-        {
+        //public async Task CargarDatosProveedor(int id)
+        //{
 
-            var proveedor = await _proveedorServicio.obtenerProveedorPorId(id);
+        //    var proveedor = await _proveedorServicio.obtenerProveedorPorId(id);
 
-            if (proveedor != null)
-            {
-                textBox1.Text = proveedor.RazonSocial;
-                textBox2.Text = proveedor.Telefono;
-                textBox3.Text = proveedor.Correo;
-                textBox4.Text = proveedor.CUIT;
-                textBox5.Text = proveedor.CodigoProovedor;
-            }
-            else
-            {
-                MessageBox.Show("Proveedor no encontrado");
-                this.Close();
-            }
+        //    if (proveedor != null)
+        //    {
+        //        textBox1.Text = proveedor.RazonSocial;
+        //        textBox2.Text = proveedor.Telefono;
+        //        textBox3.Text = proveedor.Correo;
+        //        textBox4.Text = proveedor.CUIT;
+        //        textBox5.Text = proveedor.CodigoProovedor;
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show("Proveedor no encontrado");
+        //        this.Close();
+        //    }
 
-        }
+        //}
 
-        public Proveedor ObtenerProveedorDesdeFormulario()
-        {
-            return new Proveedor
-            {
-                IdProveedor = _proveedorId,  // Usamos el id que recibiste en el constructor
-                RazonSocial = textBox1.Text,
-                Telefono = textBox2.Text,
-                Correo = textBox3.Text,
-                CUIT = textBox4.Text,
-                CodigoProovedor = textBox5.Text
-            };
-        }
+        //public Proveedor ObtenerProveedorDesdeFormulario()
+        //{
+        //    return new Proveedor
+        //    {
+        //        IdProveedor = _proveedorId,  // Usamos el id que recibiste en el constructor
+        //        RazonSocial = textBox1.Text,
+        //        Telefono = textBox2.Text,
+        //        Correo = textBox3.Text,
+        //        CUIT = textBox4.Text,
+        //        CodigoProovedor = textBox5.Text
+        //    };
+        //}
 
 
     }

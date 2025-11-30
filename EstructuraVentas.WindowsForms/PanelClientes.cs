@@ -135,42 +135,42 @@ namespace EstructuraVentas.WindowsForms
         // Funcion para eliminar (código omitido por brevedad, asumo que está correcto)
         public async Task EliminarClienteAsync()
         {
-            // ... (su código de eliminación) ...
-            if (dataGridView1.SelectedRows.Count > 0)
-            {
-                DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
-                int idCliente = Convert.ToInt32(filaSeleccionada.Cells["IDClientes"].Value);
+            //// ... (su código de eliminación) ...
+            //if (dataGridView1.SelectedRows.Count > 0)
+            //{
+            //    DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
+            //    int idCliente = Convert.ToInt32(filaSeleccionada.Cells["IDClientes"].Value);
 
-                using (var scope = _serviceProvider.CreateScope())
-                {
-                    var clienteServiciosScoped = scope.ServiceProvider.GetRequiredService<ClienteServicios>();
-                    var cliente = await clienteServiciosScoped.ObtenerPorIdClienteAsync(idCliente);
+            //    using (var scope = _serviceProvider.CreateScope())
+            //    {
+            //        var clienteServiciosScoped = scope.ServiceProvider.GetRequiredService<ClienteServicios>();
+            //        var cliente = await clienteServiciosScoped.ObtenerPorIdClienteAsync(idCliente);
 
-                    if (cliente != null)
-                    {
-                        var confirmResult = MessageBox.Show(
-                            $"¿Está seguro de que desea eliminar el cliente: {cliente.NombreCliente}?",
-                            "Confirmar eliminación",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Warning);
+            //        if (cliente != null)
+            //        {
+            //            var confirmResult = MessageBox.Show(
+            //                $"¿Está seguro de que desea eliminar el cliente: {cliente.NombreCliente}?",
+            //                "Confirmar eliminación",
+            //                MessageBoxButtons.YesNo,
+            //                MessageBoxIcon.Warning);
 
-                        if (confirmResult == DialogResult.Yes)
-                        {
-                            await clienteServiciosScoped.EliminarClienteAsync(idCliente);
-                            MessageBox.Show("Cliente eliminado correctamente.");
-                            await CargarClientesAsync(); // Recargar la lista
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("El cliente no fue encontrado.");
-                    }
-                }
-            }
-            else
-            {
-                MessageBox.Show("Por favor, seleccione un cliente para eliminar.");
-            }
+            //            if (confirmResult == DialogResult.Yes)
+            //            {
+            //                await clienteServiciosScoped.EliminarClienteAsync(idCliente);
+            //                MessageBox.Show("Cliente eliminado correctamente.");
+            //                await CargarClientesAsync(); // Recargar la lista
+            //            }
+            //        }
+            //        else
+            //        {
+            //            MessageBox.Show("El cliente no fue encontrado.");
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Por favor, seleccione un cliente para eliminar.");
+            //}
         }
 
         private async void button4_Click(object sender, EventArgs e) // Recargar

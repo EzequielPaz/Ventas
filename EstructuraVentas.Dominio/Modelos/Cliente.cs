@@ -8,8 +8,8 @@ namespace EstructuraVentas.Dominio
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
+        public string IDClientes { get; set; } = string.Empty;
 
-        public int IDClientes { get; set; }
         public string? NombreCliente { get; set; }
         public string? Email { get; set; }
         public string? Documento { get; set; }

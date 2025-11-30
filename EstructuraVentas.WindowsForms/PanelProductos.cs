@@ -35,9 +35,9 @@ namespace EstructuraVentas.WindowsForms
         //Agregar
         private void button1_Click(object sender, EventArgs e) 
         {
-            var PanelAgregarProducto = _serviceProvider.GetRequiredService<PanelAgregaProducto>();
-            PanelAgregarProducto.ProductoAgregado += async (s, args) => await CargarProductoAsync();
-            PanelAgregarProducto.Show();
+            //var PanelAgregarProducto = _serviceProvider.GetRequiredService<PanelAgregaProducto>();
+            //PanelAgregarProducto.ProductoAgregado += async (s, args) => await CargarProductoAsync();
+            //PanelAgregarProducto.Show();
         }
 
         //Modificar un producto
@@ -68,102 +68,102 @@ namespace EstructuraVentas.WindowsForms
         // Lógica para eliminar un producto
         public async Task EliminarProductoAsync()
         {
-            if (dataGridView1.SelectedRows.Count > 0)
-            {
-                DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
-                int idProducto = Convert.ToInt32(filaSeleccionada.Cells["IdProducto"].Value);
+            //if (dataGridView1.SelectedRows.Count > 0)
+            //{
+            //    DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
+            //    int idProducto = Convert.ToInt32(filaSeleccionada.Cells["IdProducto"].Value);
 
-                using (var scope = _serviceProvider.CreateScope())
-                {
-                    var productoServiciosScoped = scope.ServiceProvider.GetRequiredService<ProductoServicios>();
-                    var producto = await productoServiciosScoped.ObtenerPorIdProductoeAsync(idProducto);
+            //    using (var scope = _serviceProvider.CreateScope())
+            //    {
+            //        var productoServiciosScoped = scope.ServiceProvider.GetRequiredService<ProductoServicios>();
+            //        var producto = await productoServiciosScoped.ObtenerPorIdProductoeAsync(idProducto);
 
-                    if (producto != null)
-                    {
-                        var confirmResult = MessageBox.Show(
-                            $"¿Está seguro de que desea eliminar el producto: {producto.Nombre}?",
-                            "Confirmar eliminación",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Warning);
+            //        if (producto != null)
+            //        {
+            //            var confirmResult = MessageBox.Show(
+            //                $"¿Está seguro de que desea eliminar el producto: {producto.Nombre}?",
+            //                "Confirmar eliminación",
+            //                MessageBoxButtons.YesNo,
+            //                MessageBoxIcon.Warning);
 
-                        if (confirmResult == DialogResult.Yes)
-                        {
-                            await productoServiciosScoped.EliminarProducto(idProducto);
-                            MessageBox.Show("Producto eliminado correctamente.");
-                            await CargarProductoAsync(); // Recargar la lista
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("El producto no fue encontrado.");
-                    }
-                }
-            }
-            else
-            {
-                MessageBox.Show("Por favor, seleccione un cliente para eliminar.");
-            }
+            //            if (confirmResult == DialogResult.Yes)
+            //            {
+            //                await productoServiciosScoped.EliminarProducto(idProducto);
+            //                MessageBox.Show("Producto eliminado correctamente.");
+            //                await CargarProductoAsync(); // Recargar la lista
+            //            }
+            //        }
+            //        else
+            //        {
+            //            MessageBox.Show("El producto no fue encontrado.");
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Por favor, seleccione un cliente para eliminar.");
+            //}
         }
 
         //Lógica para cargar productos con paginación
-        public async Task CargarProductoAsync()
-        {
-            try
-            {
-                // 1. Preparar el filtro actual
-                var filterRequest = _filtroActual ?? new ProductoFilterRequest();
+        //public async Task CargarProductoAsync()
+        //{
+        //    try
+        //    {
+        //        // 1. Preparar el filtro actual
+        //        var filterRequest = _filtroActual ?? new ProductoFilterRequest();
 
-                // 2. Aplicar los valores de paginación
-                filterRequest.PageIndex = _paginaActual;
-                filterRequest.Records = _tamanioPagina;
+        //        // 2. Aplicar los valores de paginación
+        //        filterRequest.PageIndex = _paginaActual;
+        //        filterRequest.Records = _tamanioPagina;
 
-                using (var scope = _serviceProvider.CreateScope())
-                {
-                    var productoServiciosScoped = scope.ServiceProvider.GetRequiredService<ProductoServicios>();
+        //        using (var scope = _serviceProvider.CreateScope())
+        //        {
+        //            var productoServiciosScoped = scope.ServiceProvider.GetRequiredService<ProductoServicios>();
 
-                    // 3. Obtener los productos
-                    var response = await productoServiciosScoped.MostrarProductos(filterRequest);
+        //            // 3. Obtener los productos
+        //            //var response = await productoServiciosScoped.MostrarProductos(filterRequest);
 
-                    // 4. Cargar los productos en el DataGridView
-                    _productosOriginales = response.Records ?? new List<Producto>();
-                    dataGridView1.DataSource = _productosOriginales;
+        //            // 4. Cargar los productos en el DataGridView
+        //            _productosOriginales = response.Records ?? new List<Producto>();
+        //            dataGridView1.DataSource = _productosOriginales;
 
-                    // 5. Calcular total de páginas
-                    var totalRegistros = response.TotalRecords ?? 0;
-                    _totalPaginas = totalRegistros > 0
-                        ? (int)Math.Ceiling((double)totalRegistros / _tamanioPagina)
-                        : 0;
+        //            // 5. Calcular total de páginas
+        //            //var totalRegistros = response.TotalRecords ?? 0;
+        //            //_totalPaginas = totalRegistros > 0
+        //            //    ? (int)Math.Ceiling((double)totalRegistros / _tamanioPagina)
+        //            //    : 0;
 
-                    // 6. Actualizar la UI de paginación
-                    ActualizarControlesPaginacion();
+        //            // 6. Actualizar la UI de paginación
+        //            ActualizarControlesPaginacion();
 
-                    // 7. Configurar columnas específicas del DataGridView
-                    if (dataGridView1.Columns.Contains("IdProducto"))
-                        dataGridView1.Columns["IdProducto"].HeaderText = "ID";
+        //            // 7. Configurar columnas específicas del DataGridView
+        //            if (dataGridView1.Columns.Contains("IdProducto"))
+        //                dataGridView1.Columns["IdProducto"].HeaderText = "ID";
 
-                    if (dataGridView1.Columns.Contains("FechaAlta"))
-                        dataGridView1.Columns["FechaAlta"].DefaultCellStyle.Format = "dd/MM/yyyy";
+        //            if (dataGridView1.Columns.Contains("FechaAlta"))
+        //                dataGridView1.Columns["FechaAlta"].DefaultCellStyle.Format = "dd/MM/yyyy";
 
-                    if (dataGridView1.Columns.Contains("Precio"))
-                        dataGridView1.Columns["Precio"].DefaultCellStyle.Format = "C2";
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Error al cargar los productos:\n{ex.Message}",
-                    "Error de Carga",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
-            }
-        }
+        //            if (dataGridView1.Columns.Contains("Precio"))
+        //                dataGridView1.Columns["Precio"].DefaultCellStyle.Format = "C2";
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show(
+        //            $"Error al cargar los productos:\n{ex.Message}",
+        //            "Error de Carga",
+        //            MessageBoxButtons.OK,
+        //            MessageBoxIcon.Error
+        //        );
+        //    }
+        //}
 
 
         // Botón Refrescar
         private async void button4_Click(object sender, EventArgs e)
         {
-            await CargarProductoAsync();
+            //await CargarProductoAsync();
         }
 
         // Evento al hacer clic en una celda del DataGridView
@@ -186,7 +186,7 @@ namespace EstructuraVentas.WindowsForms
         private async void PanelProductos_Load(object sender, EventArgs e)
         {
             dataGridView1.ReadOnly = true;
-            await CargarProductoAsync();
+            //await CargarProductoAsync();
         }
 
         //Filtro de productos
@@ -260,7 +260,7 @@ namespace EstructuraVentas.WindowsForms
             if (_paginaActual > 1)
             {
                 _paginaActual--;
-                await CargarProductoAsync();
+                //await CargarProductoAsync();
             }
         }
 
@@ -269,7 +269,7 @@ namespace EstructuraVentas.WindowsForms
             if (_paginaActual < _totalPaginas)
             {
                 _paginaActual++;
-                await CargarProductoAsync();
+                //await CargarProductoAsync();
             }
         }
 

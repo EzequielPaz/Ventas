@@ -35,7 +35,7 @@ namespace EstructuraVentas.WindowsForms
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e) //Productos
         {
-            _panelProducto.CargarProductoAsync();
+            //_panelProducto.CargarProductoAsync();
 
         }
 

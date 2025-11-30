@@ -39,9 +39,9 @@
             button3 = new Button();
             panel1 = new Panel();
             panel2 = new Panel();
+            label3 = new Label();
             panel3 = new Panel();
             pictureBox1 = new PictureBox();
-            label3 = new Label();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             panel3.SuspendLayout();
@@ -139,6 +139,7 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(506, 192);
             panel1.TabIndex = 8;
+            panel1.Paint += panel1_Paint;
             // 
             // panel2
             // 
@@ -150,6 +151,18 @@
             panel2.Name = "panel2";
             panel2.Size = new Size(150, 192);
             panel2.TabIndex = 9;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.BackColor = Color.FromArgb(229, 215, 196);
+            label3.ForeColor = Color.Black;
+            label3.Location = new Point(12, 70);
+            label3.Name = "label3";
+            label3.Size = new Size(121, 15);
+            label3.TabIndex = 8;
+            label3.Text = "No tenes una cuenta?";
+            label3.Click += label3_Click;
             // 
             // panel3
             // 
@@ -170,18 +183,6 @@
             pictureBox1.Size = new Size(506, 137);
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.BackColor = Color.FromArgb(229, 215, 196);
-            label3.ForeColor = Color.Black;
-            label3.Location = new Point(12, 70);
-            label3.Name = "label3";
-            label3.Size = new Size(121, 15);
-            label3.TabIndex = 8;
-            label3.Text = "No tenes una cuenta?";
-            label3.Click += label3_Click;
             // 
             // PanelLogin
             // 
