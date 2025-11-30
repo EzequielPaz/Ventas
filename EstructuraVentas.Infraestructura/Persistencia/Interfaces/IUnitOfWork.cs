@@ -10,6 +10,7 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Interfaces
         IGenericRepository<Producto> Productos { get; }
         IGenericRepository<Categoria> Categorias { get; }
 
+
         IUsuarioRepository Usuarios { get; }
         int SaveChanges();
         Task<int> SaveChangesAsync();

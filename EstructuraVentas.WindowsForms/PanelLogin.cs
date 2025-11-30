@@ -14,45 +14,37 @@ namespace EstructuraVentas.WindowsForms
 {
     public partial class PanelLogin : Form
     {
-        private string nombreUsuarioTexto = string.Empty;
-        private string contraseñaTexto = string.Empty;
         private readonly UsuarioServicio _usuarioServicio;
         private readonly IServiceProvider _serviceProvider;
-        //private readonly IUsuarioServicio _usuarioServicio;
-        //public PanelLogin(IServiceProvider serviceProvider)
-        //{
-        //    InitializeComponent();
-        //    _serviceProvider = serviceProvider;
-        //    _usuarioServicio = _serviceProvider.GetRequiredService<UsuarioServicio>();
-        //    textBox1.UseSystemPasswordChar = true;
-        //    this.CenterToScreen();
-        //}
 
-        public PanelLogin(UsuarioServicio usuarioServicio)
+
+        public PanelLogin(IServiceProvider serviceProvider)
         {
-            _usuarioServicio = usuarioServicio;
+            _serviceProvider = serviceProvider;
+            _usuarioServicio = _serviceProvider.GetRequiredService<UsuarioServicio>();
+
             InitializeComponent();
             textBox1.UseSystemPasswordChar = true;
             this.CenterToScreen();
+
         }
         private async void button1_Click(object sender, EventArgs e)
         {
-            string nombreUsuarioTexto = textBox2.Text;
-            string contraseñaTexto = textBox1.Text;
+            string nombreUsuario = textBox2.Text;
+            string contraseña = textBox1.Text;
 
             try
             {
-                bool autenticado = await _usuarioServicio.AutenticarUsuarioAsync(nombreUsuarioTexto, contraseñaTexto);
+                bool autenticado = await _usuarioServicio.AutenticarUsuarioAsync(nombreUsuario, contraseña);
 
                 if (autenticado)
                 {
                     MessageBox.Show("¡Usuario encontrado!");
                     this.Hide();
 
-                    var panelDashboard = new PanelDashboard(_serviceProvider, this);  // PASO: pasar la instancia del login
+                    var panelDashboard = new PanelDashboard(_serviceProvider, this);
                     panelDashboard.Show();
                     panelDashboard.Activate();
-
                 }
                 else
                 {
@@ -63,6 +55,7 @@ namespace EstructuraVentas.WindowsForms
             {
                 MessageBox.Show("Error al autenticar usuario: " + ex.Message);
             }
+
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -72,13 +65,11 @@ namespace EstructuraVentas.WindowsForms
 
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            nombreUsuarioTexto = textBox2.Text;
 
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            contraseñaTexto = textBox1.Text;
 
         }
 

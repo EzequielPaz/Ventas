@@ -39,6 +39,10 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
             if (!resultado.IsValid)
                 throw new ValidationException(resultado.Errors);
 
+            // 🔥 VALIDAR DOCUMENTO ÚNICO
+            //if (await _unitOfWork.Clientes.DocumentoExisteAsync(dto.Documento))
+            //    throw new ValidationException("El documento ya está registrado.");
+
             var cliente = dto.ToEntity();
 
             await _unitOfWork.Clientes.AddAsync(cliente);
@@ -87,9 +91,14 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
             if (clienteExistente == null)
                 throw new KeyNotFoundException("El cliente no existe");
 
+            //VALIDAR DOCUMENTO EN OTRO CLIENTE
+            //if (await _unitOfWork.Clientes.DocumentoExisteEnOtroAsync(dto.Documento, dto.IDClientes))
+            //    throw new ValidationException("El documento ya pertenece a otro cliente.");
+
             clienteExistente.UpdateEntity(dto);
 
             await _unitOfWork.Clientes.UpdateAsync(clienteExistente.IDClientes, clienteExistente);
+
         }
 
         // ----------------- Eliminar Cliente -----------------
@@ -112,9 +121,16 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
 
             return cliente;
         }
+
+        //public async Task<bool> DocumentoEsUnicoAsync(string documento)
+        //{
+        //    var existe = await _unitOfWork.Clientes
+        //    .FindAsync(c => c.Documento == documento);
+
+        //    return !existe.Any();
+
+        //}
+
     }
-
-
-
 }
 

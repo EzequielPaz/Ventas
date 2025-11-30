@@ -8,12 +8,14 @@ namespace EstructuraVentas.Dominio.Modelos
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string IdUsuario { get; set; }
+        public string Id { get; set; }
 
-        public string NombreUsuario { get; set; }
+        public string NombreUsuario { get; set; } = string.Empty;
         public string ContraseñaHasheada { get; set; } = string.Empty;
 
-        [BsonIgnore]                //Con esta propiedad no se guarda en Mongo, parecido al Mapped de entityFramework
+        //Con esta propiedad no se guarda en Mongo, parecido al Mapped de entityFramework
+
+        [BsonIgnore]                
         public string Contraseña { get; set; }
 
         [BsonRepresentation(BsonType.String)]

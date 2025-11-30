@@ -8,5 +8,8 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Interfaces
     {
         Task<BaseEntityResponse<Cliente>> ListClientes(BaseFilterRequest filters);
 
+        Task<bool> DocumentoExisteAsync(string documento);
+        Task<bool> DocumentoExisteEnOtroAsync(string documento, string idClienteActual);
+
     }
 }

@@ -90,4 +90,26 @@ public class ClienteRepository : GenericRepository<Cliente>, IClienteRepository
     {
         await _collection.DeleteOneAsync(c => c.IDClientes == cliente.IDClientes);
     }
+
+    public async Task<bool> DocumentoExisteAsync(string documento)
+    {
+        var existe = await _collection
+            .Find(c => c.Documento == documento)
+            .AnyAsync();
+
+        return existe;
+    }
+
+    public async Task<bool> DocumentoExisteEnOtroAsync(string documento, string idClienteActual)
+    {
+        var filter = Builders<Cliente>.Filter.And(
+    Builders<Cliente>.Filter.Eq(c => c.Documento, documento),
+    Builders<Cliente>.Filter.Ne(c => c.IDClientes, idClienteActual)
+);
+
+        var existe = await _collection.Find(filter).AnyAsync();
+        return existe;
+
+
+    }
 }
