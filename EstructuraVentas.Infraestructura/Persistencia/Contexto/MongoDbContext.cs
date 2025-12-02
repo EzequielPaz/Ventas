@@ -20,10 +20,11 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Contexto
             _database = client.GetDatabase("VentasDb");
         }
 
+        public IMongoDatabase Database => _database;
+
         public IMongoCollection<Cliente> Clientes => _database.GetCollection<Cliente>("Clientes");
         public IMongoCollection<Producto> Productos => _database.GetCollection<Producto>("Productos");
-
         public IMongoCollection<Usuario> Usuarios => _database.GetCollection<Usuario>("Usuarios");
-        // Agregá más colecciones según tus entidades
+
     }
 }

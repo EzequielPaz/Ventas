@@ -7,48 +7,109 @@ using EstructuraVentas.Infraestructura.Persistencia.Contexto;
 using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
 using EstructuraVentas.Infraestructura.Persistencia.Repositories;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using System.Linq.Expressions;
 
 public class ClienteRepository : GenericRepository<Cliente>, IClienteRepository
 {
-    public ClienteRepository(ApplicationDbContext context) : base(context) { }
+    private readonly IMongoCollection<Cliente> _collection;
 
-    // Listado con filtros y paginación
+
+    public ClienteRepository(IMongoDatabase database)
+    : base(database, "Clientes")
+    {
+        _collection = database.GetCollection<Cliente>("Clientes");
+    }
+
+    /// ================================
+    // LISTADO CON FILTROS + PAGINACIÓN
+    // ================================
     public async Task<BaseEntityResponse<Cliente>> ListClientes(BaseFilterRequest filters)
     {
-        // Convertimos int? a enum? para poder comparar enum con enum
-        Estado? estadoFilter = filters.StateFilter.HasValue
-            ? (Estado?)filters.StateFilter.Value
-            : null;
+        var builder = Builders<Cliente>.Filter;
+        var filter = builder.Empty;
 
-        Expression<Func<Cliente, bool>> filtroExtra = c =>
-            (string.IsNullOrEmpty(filters.TextFilter) || c.NombreCliente.Contains(filters.TextFilter)) &&
-            (!estadoFilter.HasValue || c.Estado == estadoFilter.Value);
+        // Buscar por texto (NombreCliente)
+        if (!string.IsNullOrEmpty(filters.TextFilter))
+        {
+            filter &= builder.Regex(c => c.NombreCliente,
+                new MongoDB.Bson.BsonRegularExpression(filters.TextFilter, "i"));
+        }
 
-        return await ListAsync(filters, filtroExtra);
+        // Filtro por Estado
+        if (filters.StateFilter.HasValue)
+        {
+            Estado estado = (Estado)filters.StateFilter.Value;
+            filter &= builder.Eq(c => c.Estado, estado);
+        }
+
+        // Contar total
+        long totalRecords = await _collection.CountDocumentsAsync(filter);
+
+        // Orden + Paginación
+        var result = await _collection.Find(filter)
+            .Skip((filters.PageIndex - 1) * filters.PageSize)
+            .Limit(filters.PageSize)
+            .ToListAsync();
+
+        return new BaseEntityResponse<Cliente>
+        {
+            TotalRecords = (int)totalRecords,
+            Records = result
+        };
     }
 
-    // Obtener cliente por ID
-    public async Task<Cliente?> GetClientById(int id)
+    // ================================
+    // OBTENER POR ID
+    // ================================
+    public async Task<Cliente?> GetClientById(string id)
     {
-        return await GetByIdAsync(id);
+        return await _collection.Find(c => c.IDClientes == id).FirstOrDefaultAsync();
     }
 
-    // Registrar cliente (sin SaveChanges, lo hace UnitOfWork)
+    // ================================
+    // REGISTRAR CLIENTE
+    // ================================
     public async Task RegisterClient(Cliente cliente)
     {
-        await AddAsync(cliente);
+        await _collection.InsertOneAsync(cliente);
     }
 
-    // Editar cliente (sin SaveChanges, lo hace UnitOfWork)
-    public void EditClient(Cliente cliente)
+    // ================================
+    // EDITAR CLIENTE
+    // ================================
+    public async Task EditClient(Cliente cliente)
     {
-        Update(cliente);
+        await _collection.ReplaceOneAsync(c => c.IDClientes == cliente.IDClientes, cliente);
     }
 
-    // Eliminar cliente (sin SaveChanges, lo hace UnitOfWork)
-    public void DeleteClient(Cliente cliente)
+    // ================================
+    // ELIMINAR CLIENTE
+    // ================================
+    public async Task DeleteClient(Cliente cliente)
     {
-        Remove(cliente);
+        await _collection.DeleteOneAsync(c => c.IDClientes == cliente.IDClientes);
+    }
+
+    public async Task<bool> DocumentoExisteAsync(string documento)
+    {
+        var existe = await _collection
+            .Find(c => c.Documento == documento)
+            .AnyAsync();
+
+        return existe;
+    }
+
+    public async Task<bool> DocumentoExisteEnOtroAsync(string documento, string idClienteActual)
+    {
+        var filter = Builders<Cliente>.Filter.And(
+    Builders<Cliente>.Filter.Eq(c => c.Documento, documento),
+    Builders<Cliente>.Filter.Ne(c => c.IDClientes, idClienteActual)
+);
+
+        var existe = await _collection.Find(filter).AnyAsync();
+        return existe;
+
+
     }
 }

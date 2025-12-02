@@ -13,8 +13,8 @@ namespace EstructuraVentas.LogicaNegocio.Validators.Cliente
     {
         public UpdateClienteDTOValidator()
         {
-            RuleFor(c => c.IDClientes)
-               .GreaterThan(0).WithMessage("El Id debe ser válido");
+            //RuleFor(c => c.IDClientes)
+            //   .GreaterThan(0).WithMessage("El Id debe ser válido");
 
             RuleFor(c => c.NombreCliente)
                 .NotEmpty().WithMessage("El nombre es obligatorio")

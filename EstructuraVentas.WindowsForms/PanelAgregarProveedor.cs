@@ -47,54 +47,54 @@ namespace EstructuraVentas.WindowsForms
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            var razonSocialTexto = textBox1.Text;
-            var telefonoTexto = textBox2.Text;
-            var correoTexto = textBox3.Text;
-            var cuitTexto = textBox4.Text;
-            var codigoTexto = textBox5.Text;
+            //var razonSocialTexto = textBox1.Text;
+            //var telefonoTexto = textBox2.Text;
+            //var correoTexto = textBox3.Text;
+            //var cuitTexto = textBox4.Text;
+            //var codigoTexto = textBox5.Text;
 
 
 
 
-            //Validar que todos los campos estén completos
-            if (string.IsNullOrEmpty(razonSocialTexto) ||
-                string.IsNullOrEmpty(telefonoTexto) || 
-                string.IsNullOrEmpty(correoTexto) || string.IsNullOrEmpty(cuitTexto) || 
-                string.IsNullOrEmpty(codigoTexto))
-            {
-                MessageBox.Show("Debes llenar todos los campos.");
-                return;
-            }
+            ////Validar que todos los campos estén completos
+            //if (string.IsNullOrEmpty(razonSocialTexto) ||
+            //    string.IsNullOrEmpty(telefonoTexto) || 
+            //    string.IsNullOrEmpty(correoTexto) || string.IsNullOrEmpty(cuitTexto) || 
+            //    string.IsNullOrEmpty(codigoTexto))
+            //{
+            //    MessageBox.Show("Debes llenar todos los campos.");
+            //    return;
+            //}
 
 
-            var nuevoProveedor = new Proveedor
-            {
-                RazonSocial = razonSocialTexto,
-                Telefono = telefonoTexto,
-                Correo = correoTexto,
-                CUIT = cuitTexto,
-                CodigoProovedor = codigoTexto,
-                FechaDeRegistro = DateTime.Now,
-            };
+            //var nuevoProveedor = new Proveedor
+            //{
+            //    RazonSocial = razonSocialTexto,
+            //    Telefono = telefonoTexto,
+            //    Correo = correoTexto,
+            //    CUIT = cuitTexto,
+            //    CodigoProovedor = codigoTexto,
+            //    FechaDeRegistro = DateTime.Now,
+            //};
 
-            try
-            {
-                var proveedorServicio = _serviceProvider.GetService<ProveedorServicio>();
-                await proveedorServicio.agregarProveedorAsync(nuevoProveedor);
-                MessageBox.Show("¡Proveedor registrado con éxito!");
-                LimpiarCampos();
-                this.Hide();
+            //try
+            //{
+            //    var proveedorServicio = _serviceProvider.GetService<ProveedorServicio>();
+            //    await proveedorServicio.agregarProveedorAsync(nuevoProveedor);
+            //    MessageBox.Show("¡Proveedor registrado con éxito!");
+            //    LimpiarCampos();
+            //    this.Hide();
 
-            }
-            catch (ValidationException ex)
-            {
-                MessageBox.Show(ex.Message, "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            //}
+            //catch (ValidationException ex)
+            //{
+            //    MessageBox.Show(ex.Message, "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //}
 
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al registrar usuario: " + ex.Message);
-            }
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show("Error al registrar usuario: " + ex.Message);
+            //}
             
         }
 
@@ -112,14 +112,14 @@ namespace EstructuraVentas.WindowsForms
         {
 
         }
-        private void LimpiarCampos()
-        {
-            textBox1.Clear();
-            textBox2.Clear();
-            textBox3.Clear();
-            textBox4.Clear();
-            textBox5.Clear();
-        }
+        //private void LimpiarCampos()
+        //{
+        //    textBox1.Clear();
+        //    textBox2.Clear();
+        //    textBox3.Clear();
+        //    textBox4.Clear();
+        //    textBox5.Clear();
+        //}
 
 
     }

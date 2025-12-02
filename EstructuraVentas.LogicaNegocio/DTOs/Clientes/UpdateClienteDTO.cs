@@ -8,10 +8,12 @@ namespace EstructuraVentas.LogicaNegocio.DTOs.Clientes
 {
     public class UpdateClienteDTO
     {
-        public int IDClientes { get; set; }
-        public string NombreCliente { get; set; }
-        public string Email { get; set; }
-        public string Documento { get; set; }
-        public string Celular { get; set; }
+        public string IDClientes { get; set; } = string.Empty;
+
+        public string NombreCliente { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Documento { get; set; } = string.Empty;
+        public string Celular { get; set; } = string.Empty;
+
     }
 }

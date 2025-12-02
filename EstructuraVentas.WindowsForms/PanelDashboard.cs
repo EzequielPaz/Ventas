@@ -17,12 +17,14 @@ namespace EstructuraVentas.WindowsForms
     {
         private readonly IServiceProvider _serviceProvider;
         private Form _loginForm;
-        public PanelDashboard(IServiceProvider serviceProvider, Form loginForm)
+        public PanelDashboard(IServiceProvider serviceProvider, PanelLogin loginForm)
         {
             InitializeComponent();
-            _serviceProvider = serviceProvider;
             this.CenterToScreen();
+
+            _serviceProvider = serviceProvider;
             _loginForm = loginForm;
+
         }
 
         private void PanelDashboard_Load(object sender, EventArgs e)

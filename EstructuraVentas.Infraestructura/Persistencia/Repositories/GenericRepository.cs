@@ -1,87 +1,68 @@
 ﻿using EstructuraVentas.Infraestructura.Commons.Bases.Request;
 using EstructuraVentas.Infraestructura.Commons.Bases.Response;
-using EstructuraVentas.Infraestructura.Persistencia.Contexto;
 using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using System.Linq.Expressions;
 
 namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        protected readonly ApplicationDbContext _context;
-        protected readonly DbSet<T> _dbSet;
+        private readonly IMongoCollection<T> _collection;
 
-        public GenericRepository(ApplicationDbContext context)
+        public GenericRepository(IMongoDatabase database, string collectionName)
         {
-            _context = context;
-            _dbSet = context.Set<T>();
+            _collection = database.GetCollection<T>(collectionName);
         }
 
-        public async Task<T?> GetByIdAsync(int id, Func<IQueryable<T>, IQueryable<T>>? include = null)
+        public async Task<T?> GetByIdAsync(string id)
         {
-            IQueryable<T> query = _dbSet.AsQueryable();
-
-            if (include != null)
-                query = include(query);
-
-            var entity = await _dbSet.FindAsync(id);
-
-            if (entity == null)
-                return null;
-
-            // Si se pidió include, EF no lo carga con FindAsync
-            if (include != null)
-            {
-                var keyProperty = _context.Model.FindEntityType(typeof(T))?.FindPrimaryKey()?.Properties.First();
-                var keyName = keyProperty?.Name ?? "Id";
-                var keyValue = typeof(T).GetProperty(keyName)?.GetValue(entity);
-
-                return await query.FirstOrDefaultAsync(e => EF.Property<object>(e, keyName).Equals(keyValue));
-            }
-
-            return entity;
+            var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
+            return await _collection.Find(filter).FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync() =>
-            await _dbSet.AsNoTracking().ToListAsync();
+        public async Task<IEnumerable<T>> GetAllAsync()
+        {
+            return await _collection.Find(Builders<T>.Filter.Empty).ToListAsync();
+        }
 
-        public async Task AddAsync(T entity) =>
-            await _dbSet.AddAsync(entity);
+        public async Task AddAsync(T entity)
+        {
+            await _collection.InsertOneAsync(entity);
+        }
 
-        public void Update(T entity) =>
-            _dbSet.Update(entity);
+        public async Task UpdateAsync(string id, T entity)
+        {
+            var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
+            await _collection.ReplaceOneAsync(filter, entity);
+        }
 
-        public void Remove(T entity) =>
-            _dbSet.Remove(entity);
+        public async Task RemoveAsync(string id)
+        {
+            var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
+            await _collection.DeleteOneAsync(filter);
+        }
 
         public async Task<BaseEntityResponse<T>> ListAsync(
             BaseFilterRequest filters,
-            Expression<Func<T, bool>>? extraFilter = null,
-            Func<IQueryable<T>, IQueryable<T>>? include = null)
+            Expression<Func<T, bool>>? extraFilter = null)
         {
-            filters ??= new BaseFilterRequest();
-
             if (filters.PageIndex <= 0) filters.PageIndex = 1;
             if (filters.PageSize <= 0) filters.PageSize = 10;
             if (filters.PageSize > 50) filters.PageSize = 50;
 
-            IQueryable<T> query = _dbSet.AsNoTracking();
+            var filter = extraFilter ?? (_ => true);
 
-            if (include != null)
-                query = include(query);
+            var query = _collection.AsQueryable().Where(filter);
 
-            if (extraFilter != null)
-                query = query.Where(extraFilter);
+            var totalRecords = query.Count();
 
-            // 🔹 Orden por defecto (importante para paginación estable)
-            query = query.OrderBy(e => EF.Property<object>(e, "Id" + typeof(T).Name));
-
-            var totalRecords = await query.CountAsync();
-            var items = await query
+            var items = query
                 .Skip((filters.PageIndex - 1) * filters.PageSize)
                 .Take(filters.PageSize)
-                .ToListAsync();
+                .ToList();
 
             return new BaseEntityResponse<T>
             {
@@ -89,7 +70,5 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
                 Records = items
             };
         }
-
-
     }
 }
