@@ -1,5 +1,9 @@
-﻿using EstructuraVentas.Dominio.Modelos;
+﻿using EstructuraVentas.Dominio;
+using EstructuraVentas.Dominio.Modelos;
+using EstructuraVentas.LogicaNegocio.DTOs.Clientes;
+using EstructuraVentas.LogicaNegocio.DTOs.Proveedor;
 using EstructuraVentas.LogicaNegocio.Servicios;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -15,24 +19,67 @@ namespace EstructuraVentas.WindowsForms
 {
     public partial class PanelEditarProveedor : Form
     {
-        //varibles de clase
+        private readonly string _idProveedor;
         private readonly IServiceProvider _serviceProvider;
-        private readonly ProveedorServicio _proveedorServicio;
-        private readonly int _proveedorId;
-        //contructor
-        public PanelEditarProveedor(IServiceProvider serviceProvider, int idProveedor)
+
+        // Evento para notificar al formulario padre que el cliente se modificó
+        public event EventHandler ProveedorModificado;
+        public PanelEditarProveedor(IServiceProvider serviceProvider, string idProveedor)
         {
             InitializeComponent();
             _serviceProvider = serviceProvider;
-            _proveedorServicio = _serviceProvider.GetRequiredService<ProveedorServicio>();
-            _proveedorId = idProveedor;
+            _idProveedor = idProveedor;
             this.CenterToScreen();
         }
         //load
         private async void PanelEditarProveedor_Load(object sender, EventArgs e)
         {
-            //await CargarDatosProveedor(_proveedorId);
+            try
+            {
+                await CargarDatosProveedor(_idProveedor);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar los datos del proveedor: {ex.Message}",
+                                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+            }
+        }
 
+        private async Task CargarDatosProveedor(string id)
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var proveedorServiciosScoped = scope.ServiceProvider.GetRequiredService<ProveedorServicio>();
+                var proveedor = await proveedorServiciosScoped.ObtenerPorIdProveedorAsync(id);
+
+                if (proveedor != null)
+                {
+                    textBox1.Text = proveedor.RazonSocial;
+                    textBox2.Text = proveedor.CUIT;
+                    textBox3.Text = proveedor.CodigoProveedor;
+                    textBox4.Text = proveedor.Telefono;
+                    textBox5.Text = proveedor.Correo;
+                }
+                else
+                {
+                    MessageBox.Show("Proveedor no encontrado", "Información", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    this.Close();
+                }
+            }
+        }
+
+        private UpdateProveedorDTO ObtenerProveedorDesdePanel()
+        {
+            return new UpdateProveedorDTO
+            {
+                IdProveedor = _idProveedor,
+                RazonSocial = textBox1.Text.Trim(),
+                CUIT = textBox2.Text.Trim(),
+                CodigoProveedor = textBox3.Text.Trim(),
+                Telefono = textBox4.Text.Trim(),
+                Correo = textBox5.Text.Trim(),
+            };
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -62,20 +109,42 @@ namespace EstructuraVentas.WindowsForms
         //BOTON GUARDAR MODIFICACION
         private async void button1_Click(object sender, EventArgs e)
         {
-            //try
-            //{
-            //    var proveedorActualizado = ObtenerProveedorDesdeFormulario();
+            if (string.IsNullOrWhiteSpace(textBox1.Text) ||
+               string.IsNullOrWhiteSpace(textBox2.Text) ||
+               string.IsNullOrWhiteSpace(textBox3.Text) ||
+               string.IsNullOrWhiteSpace(textBox4.Text))
+            {
+                MessageBox.Show("Todos los campos son obligatorios.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
-            //    // Llamás al servicio para actualizar
-            //    await _proveedorServicio.ActualizarProveedorAsync(proveedorActualizado);
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                try
+                {
+                    var dto = ObtenerProveedorDesdePanel();
+                    var proveedorServiciosScoped = scope.ServiceProvider.GetRequiredService<ProveedorServicio>();
+                    await proveedorServiciosScoped.ModificarProveedorAsync(dto);
 
-            //    MessageBox.Show("Proveedor actualizado correctamente.");
-            //    this.Close();  // Cerrás el formulario si querés
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show($"Error al actualizar proveedor: {ex.Message}");
-            //}
+
+
+                    MessageBox.Show("Proveedor actualizado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Notificar al formulario padre
+                    ProveedorModificado?.Invoke(this, EventArgs.Empty);
+
+                    this.Close();
+                }
+                catch (ValidationException vex)
+                {
+                    var errores = string.Join(Environment.NewLine, vex.Errors.Select(e => e.ErrorMessage));
+                    MessageBox.Show("Errores de validación:\n" + errores, "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error al actualizar proveedor: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
         //BOTON CANCELAR
@@ -84,42 +153,6 @@ namespace EstructuraVentas.WindowsForms
         {
             this.Hide();
         }
-
-        //FUNCION QUE CARGA DATOS DEL PROVEEDOR AL HACER CLICK EN LA FILA 
-        //public async Task CargarDatosProveedor(int id)
-        //{
-
-        //    var proveedor = await _proveedorServicio.obtenerProveedorPorId(id);
-
-        //    if (proveedor != null)
-        //    {
-        //        textBox1.Text = proveedor.RazonSocial;
-        //        textBox2.Text = proveedor.Telefono;
-        //        textBox3.Text = proveedor.Correo;
-        //        textBox4.Text = proveedor.CUIT;
-        //        textBox5.Text = proveedor.CodigoProovedor;
-        //    }
-        //    else
-        //    {
-        //        MessageBox.Show("Proveedor no encontrado");
-        //        this.Close();
-        //    }
-
-        //}
-
-        //public Proveedor ObtenerProveedorDesdeFormulario()
-        //{
-        //    return new Proveedor
-        //    {
-        //        IdProveedor = _proveedorId,  // Usamos el id que recibiste en el constructor
-        //        RazonSocial = textBox1.Text,
-        //        Telefono = textBox2.Text,
-        //        Correo = textBox3.Text,
-        //        CUIT = textBox4.Text,
-        //        CodigoProovedor = textBox5.Text
-        //    };
-        //}
-
 
     }
 }

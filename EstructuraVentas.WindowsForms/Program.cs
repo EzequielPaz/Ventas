@@ -3,7 +3,6 @@ using EstructuraVentas.Infraestructura.Persistencia.Contexto;
 using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
 using EstructuraVentas.Infraestructura.Persistencia.Repositories;
 using EstructuraVentas.LogicaNegocio.Servicios;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;

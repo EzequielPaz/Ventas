@@ -40,6 +40,9 @@
             iconButton6 = new FontAwesome.Sharp.IconButton();
             textBox1 = new TextBox();
             button1 = new Button();
+            botonAnterior = new Button();
+            botonSiguiente = new Button();
+            label3 = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
@@ -59,7 +62,7 @@
             dataGridView1.Location = new Point(127, 168);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.RowTemplate.Height = 25;
-            dataGridView1.Size = new Size(899, 390);
+            dataGridView1.Size = new Size(641, 250);
             dataGridView1.TabIndex = 1;
             dataGridView1.CellContentClick += dataGridView1_CellContentClick;
             // 
@@ -70,7 +73,7 @@
             iconButton1.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconButton1.IconSize = 25;
             iconButton1.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton1.Location = new Point(713, 564);
+            iconButton1.Location = new Point(455, 461);
             iconButton1.Name = "iconButton1";
             iconButton1.Size = new Size(97, 32);
             iconButton1.TabIndex = 3;
@@ -99,7 +102,7 @@
             iconButton3.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconButton3.IconSize = 25;
             iconButton3.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton3.Location = new Point(816, 564);
+            iconButton3.Location = new Point(558, 461);
             iconButton3.Name = "iconButton3";
             iconButton3.Size = new Size(97, 32);
             iconButton3.TabIndex = 5;
@@ -114,7 +117,7 @@
             iconButton4.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconButton4.IconSize = 25;
             iconButton4.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton4.Location = new Point(127, 564);
+            iconButton4.Location = new Point(127, 428);
             iconButton4.Name = "iconButton4";
             iconButton4.Size = new Size(104, 32);
             iconButton4.TabIndex = 6;
@@ -129,7 +132,7 @@
             iconButton5.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconButton5.IconSize = 25;
             iconButton5.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton5.Location = new Point(919, 564);
+            iconButton5.Location = new Point(661, 461);
             iconButton5.Name = "iconButton5";
             iconButton5.Size = new Size(107, 32);
             iconButton5.TabIndex = 7;
@@ -161,7 +164,7 @@
             iconButton6.IconColor = Color.Black;
             iconButton6.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconButton6.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton6.Location = new Point(845, 623);
+            iconButton6.Location = new Point(587, 508);
             iconButton6.Name = "iconButton6";
             iconButton6.Size = new Size(181, 42);
             iconButton6.TabIndex = 10;
@@ -187,11 +190,44 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
+            // botonAnterior
+            // 
+            botonAnterior.Location = new Point(612, 424);
+            botonAnterior.Name = "botonAnterior";
+            botonAnterior.Size = new Size(75, 23);
+            botonAnterior.TabIndex = 13;
+            botonAnterior.Text = "Anterior";
+            botonAnterior.UseVisualStyleBackColor = true;
+            botonAnterior.Click += botonAnterior_Click;
+            // 
+            // botonSiguiente
+            // 
+            botonSiguiente.Location = new Point(693, 424);
+            botonSiguiente.Name = "botonSiguiente";
+            botonSiguiente.Size = new Size(75, 23);
+            botonSiguiente.TabIndex = 14;
+            botonSiguiente.Text = "Siguiente";
+            botonSiguiente.UseVisualStyleBackColor = true;
+            botonSiguiente.Click += botonSiguiente_Click;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(534, 428);
+            label3.Name = "label3";
+            label3.Size = new Size(38, 15);
+            label3.TabIndex = 15;
+            label3.Text = "label3";
+            label3.Click += label3_Click;
+            // 
             // PanelProveedores
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1280, 819);
+            ClientSize = new Size(825, 488);
+            Controls.Add(label3);
+            Controls.Add(botonSiguiente);
+            Controls.Add(botonAnterior);
             Controls.Add(button1);
             Controls.Add(textBox1);
             Controls.Add(iconButton6);
@@ -226,5 +262,8 @@
         private FontAwesome.Sharp.IconButton iconButton6;
         private TextBox textBox1;
         private Button button1;
+        private Button botonAnterior;
+        private Button botonSiguiente;
+        private Label label3;
     }
 }

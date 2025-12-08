@@ -17,6 +17,7 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
 
         // 👍 Repositorio personalizado
         public IUsuarioRepository Usuarios { get; }
+        public IGenericRepository<Proveedor> Proveedores { get; }
 
         public UnitOfWork(IMongoDatabase database)
         {
@@ -27,6 +28,7 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
             Categorias = new GenericRepository<Categoria>(_database, "Categorias");
             // 👍 Tu repositorio personalizado
             Usuarios = new UsuarioRepository(_database);
+            Proveedores = new GenericRepository<Proveedor>(_database, "Proveedores");
         }
 
         public int SaveChanges() => 1;
