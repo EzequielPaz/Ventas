@@ -14,7 +14,7 @@ namespace EstructuraVentas.Dominio.Validators
             RuleFor(p => p.CUIT).Matches(@"^\d{2}-\d{8}-\d{1}$")
                 .WithMessage("El CUIT debe tener un formato numerico de XX-XXXXXXXX-X.");
 
-            RuleFor(p => p.CodigoProovedor).MaximumLength(50)
+            RuleFor(p => p.CodigoProveedor).MaximumLength(50)
                 .WithMessage("La cantidad maxima de caracteres es de 50");
 
             RuleFor(p => p.Telefono)

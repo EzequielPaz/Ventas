@@ -120,7 +120,7 @@ namespace EstructuraVentas.WindowsForms
 
                     // ... (Configuración de columnas) ...
                     if (dataGridView1.Columns.Contains("IDClientes"))
-                        dataGridView1.Columns["IDClientes"].Visible = true;
+                        dataGridView1.Columns["IDClientes"].Visible = false;
 
                     if (dataGridView1.Columns.Contains("FechaDeRegistro"))
                         dataGridView1.Columns["FechaDeRegistro"].DefaultCellStyle.Format = "dd/MM/yyyy";

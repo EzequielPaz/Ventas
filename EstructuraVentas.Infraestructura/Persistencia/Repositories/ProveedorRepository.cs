@@ -1,6 +1,12 @@
-﻿using EstructuraVentas.Dominio.Modelos;
+﻿using EstructuraVentas.Dominio;
+using EstructuraVentas.Dominio.Commons.Enums;
+using EstructuraVentas.Dominio.Modelos;
+using EstructuraVentas.Infraestructura.Commons.Bases.Request;
+using EstructuraVentas.Infraestructura.Commons.Bases.Response;
 using EstructuraVentas.Infraestructura.Persistencia.Contexto;
+using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,78 +15,81 @@ using System.Threading.Tasks;
 
 namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
 {
-    //Esta clase implementa la interfaz IProveedorRepository para manejar operaciones CRUD sobre la entidad Proveedor
-    //dentro de una base de datos usando Entity Framework 
 
-
-    public class ProveedorRepository: IProveedorRepository
+    public class ProveedorRepository : GenericRepository<Proveedor>, IProveedorRepository
     {
-        private readonly ApplicationDbContext _context;
-        //Constructor 
-        public ProveedorRepository(ApplicationDbContext context) 
+        private readonly IMongoCollection<Proveedor> _collection;         
+        public ProveedorRepository(IMongoDatabase database)
+    : base(database, "Proveedor")
         {
-            _context = context;
-        
+            _collection = database.GetCollection<Proveedor>("Proveedores");
         }
-        public async Task agregarProveedorAsync(Proveedor proveedor)
+        public async Task<BaseEntityResponse<Proveedor>> ListProveedor(BaseFilterRequest filters)
         {
-            _context.Proveedores.Add(proveedor);
-            await _context.SaveChangesAsync();
+            var builder = Builders<Proveedor>.Filter;
+            var filter = builder.Empty;
 
-        }
-
-        //IQueryable<Proveedor> es una interfaz que representa una consulta a la base de datos que aún no se ha ejecutado
-        public IQueryable<Proveedor> Proveedores => _context.Proveedores.AsNoTracking();
-
-
-        public async Task actualizarProveedorAsync(Proveedor proveedor)
-        {
-
-            var trackedEntity = await _context.Proveedores.FindAsync(proveedor.IdProveedor);
-            if (trackedEntity != null)
+            // Buscar por texto (CodigoProveedor)
+            if (!string.IsNullOrEmpty(filters.TextFilter))
             {
-                _context.Entry(trackedEntity).CurrentValues.SetValues(proveedor);
-            }
-            else
-            {
-                _context.Proveedores.Update(proveedor);
+                filter &= builder.Regex(c => c.CodigoProveedor,
+                    new MongoDB.Bson.BsonRegularExpression(filters.TextFilter, "i"));
             }
 
-            await _context.SaveChangesAsync();  // ¡Agrega esta línea!
-
-        }
-
-
-        public async Task eliminarProveedorAsync(int id)
-        {
-            var proveedor = await _context.Proveedores.SingleOrDefaultAsync(p => p.IdProveedor == id);
-            if (proveedor != null)
+            // Filtro por Estado
+            if (filters.StateFilter.HasValue)
             {
-                _context.Proveedores.Remove(proveedor);
-                await _context.SaveChangesAsync();
+                Estado estado = (Estado)filters.StateFilter.Value;
+                filter &= builder.Eq(c => c.Estado, estado);
             }
 
+            // Contar total
+            long totalRecords = await _collection.CountDocumentsAsync(filter);
+
+            // Orden + Paginación
+            var result = await _collection.Find(filter)
+                .Skip((filters.PageIndex - 1) * filters.PageSize)
+                .Limit(filters.PageSize)
+                .ToListAsync();
+
+            return new BaseEntityResponse<Proveedor>
+            {
+                TotalRecords = (int)totalRecords,
+                Records = result
+            };
         }
 
-        public async Task<List<Proveedor>> mostrarProveedoresAsync()
+        // ================================
+        // OBTENER POR ID
+        // ================================
+        public async Task<Proveedor?> GetClientById(string id)
         {
-            return await _context.Proveedores.ToListAsync();
-
+            return await _collection.Find(c => c.IdProveedor == id).FirstOrDefaultAsync();
         }
 
-        public async Task<Proveedor> obtenerPorIdAsync(int id)
+        // ================================
+        // REGISTRAR CLIENTE
+        // ================================
+        public async Task RegisterClient(Proveedor proveedor)
         {
-            var proveedor = await _context.Proveedores
-        .FirstOrDefaultAsync(u => u.IdProveedor == id);
-
-            return proveedor; // Si no lo encuentra, devuelve null, averiguar como manejar esto
-
+            await _collection.InsertOneAsync(proveedor);
         }
 
-
-        public async Task guardarCambiosAsync()
+        // ================================
+        // EDITAR CLIENTE
+        // ================================
+        public async Task EditClient(Proveedor proveedor)
         {
-            await _context.SaveChangesAsync();
+            await _collection.ReplaceOneAsync(c => c.IdProveedor == proveedor.IdProveedor, proveedor);
         }
+
+        // ================================
+        // ELIMINAR CLIENTE
+        // ================================
+        public async Task DeleteClient(Proveedor proveedor)
+        {
+            await _collection.DeleteOneAsync(c => c.IdProveedor == proveedor.IdProveedor);
+        }
+
     }
 }

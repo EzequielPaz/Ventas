@@ -1,79 +1,128 @@
-﻿using EstructuraVentas.Dominio.Modelos;
-using EstructuraVentas.Dominio.Validators;
-using EstructuraVentas.Infraestructura.Persistencia.Repositories;
+﻿using EstructuraVentas.Dominio.Commons.Enums;
+using EstructuraVentas.Dominio.Modelos;
+using EstructuraVentas.Infraestructura.Commons.Bases.Request;
+using EstructuraVentas.Infraestructura.Commons.Bases.Response;
+using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
+using EstructuraVentas.LogicaNegocio.DTOs.Proveedor;
+using EstructuraVentas.LogicaNegocio.Mapper;
+using EstructuraVentas.LogicaNegocio.Validators.Proveedor;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using System.Linq.Expressions;
 
 namespace EstructuraVentas.LogicaNegocio.Servicios
 {
     public class ProveedorServicio
     {
         //variables de clase
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IProveedorRepository _proveedorRepository;
-        private readonly ProveedorValidator _validator;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly CreateProveedorDtoValidator _validatorCreate;
+        private readonly UpdateProveedorDtoValidator _validatorUpdate;
 
         //CONSTRUCTOR
-        public ProveedorServicio(IServiceProvider serviceProvider)
+        public ProveedorServicio(IUnitOfWork unitOfWork)
         {
-            _serviceProvider = serviceProvider;
-            _proveedorRepository = _serviceProvider.GetRequiredService<IProveedorRepository>();
-            _validator = new ProveedorValidator();
+            _unitOfWork = unitOfWork;
+            _validatorCreate = new CreateProveedorDtoValidator();
+            _validatorUpdate = new UpdateProveedorDtoValidator();
         }
 
         //Agregar proveedor
 
-        public async Task agregarProveedorAsync(Proveedor proveedor) 
+        public async Task AgregarProveedorAsync(CreateProveedorDTO dto) 
         {
-            var resultado = _validator.Validate(proveedor);
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
 
+            var resultado = _validatorCreate.Validate(dto);
             if (!resultado.IsValid)
-            {
-                var errores = string.Join(Environment.NewLine, resultado.Errors.Select(e => e.ErrorMessage));
-                throw new ValidationException(errores);
-            }
+                throw new ValidationException(resultado.Errors);
 
-            await _proveedorRepository.agregarProveedorAsync(proveedor);
-         
+            // 🔥 VALIDAR DOCUMENTO ÚNICO
+            //if (await _unitOfWork.Clientes.DocumentoExisteAsync(dto.Documento))
+            //    throw new ValidationException("El documento ya está registrado.");
+
+            var proveedor = dto.ToEntity();
+
+            await _unitOfWork.Proveedores.AddAsync(proveedor);
+
         }
 
         //Muestra todos en el data grid view 
 
-        public async Task<List<Proveedor>> mostrarProveedoresAsync()
+        public async Task<BaseEntityResponse<Proveedor>> MostrarProveedores(ProveedorFilterRequest? filters = null)
         {
-            try
-            {
-                var proveedores = await _proveedorRepository.mostrarProveedoresAsync();
-                return proveedores;
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Error al obtener los proveedores.", ex);
-            }
+            filters ??= new ProveedorFilterRequest();
+
+            Estado? estadoFilter = null;
+            if (filters.StateFilter.HasValue)
+                estadoFilter = (Estado)filters.StateFilter.Value;
+
+            // ❤️ Mongo sí permite expresiones pero SIN EF.Functions
+            Expression<Func<Proveedor, bool>> filtroExtra = p =>
+            (string.IsNullOrEmpty(filters.RazonSocialFilter) ||
+                p.RazonSocial.Contains(filters.RazonSocialFilter))
+
+            && (string.IsNullOrEmpty(filters.CodigoProveedorFilter) ||
+                p.CodigoProveedor.Contains(filters.CodigoProveedorFilter))
+
+            && (string.IsNullOrEmpty(filters.CUILTFilter) ||
+                p.CUIT.Contains(filters.CUILTFilter))
+
+            && (string.IsNullOrEmpty(filters.TelefonoFilter) ||
+                p.Telefono.Contains(filters.TelefonoFilter))
+
+            && (!estadoFilter.HasValue || p.Estado == estadoFilter.Value);
+
+
+            var response = await _unitOfWork.Proveedores.ListAsync(filters, filtroExtra);
+
+            return response;
         }
 
-        //Obtiene el proveedor por su id 
-        public async Task<Proveedor> obtenerProveedorPorId(int id)
-        {
-            return await _proveedorRepository.Proveedores
-        .AsNoTracking()
-        .FirstOrDefaultAsync(p => p.IdProveedor == id);
-
-        }
+       
 
         //Edita el proveedor 
-        public async Task ActualizarProveedorAsync(Proveedor proveedor)
+        public async Task ModificarProveedorAsync(UpdateProveedorDTO dto)
         {
-            await _proveedorRepository.actualizarProveedorAsync(proveedor);
-            await _proveedorRepository.guardarCambiosAsync();
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
+
+            var validacion = _validatorUpdate.Validate(dto);
+            if (!validacion.IsValid)
+                throw new ValidationException(validacion.Errors);
+
+            var proveedorExistente = await _unitOfWork.Proveedores.GetByIdAsync(dto.IdProveedor);
+
+            if (proveedorExistente == null)
+                throw new KeyNotFoundException("El Proveedor no existe");
+
+            //VALIDAR DOCUMENTO EN OTRO CLIENTE
+            //if (await _unitOfWork.Clientes.DocumentoExisteEnOtroAsync(dto.Documento, dto.IDClientes))
+            //    throw new ValidationException("El documento ya pertenece a otro cliente.");
+
+            proveedorExistente.UpdateEntity(dto);
+
+            await _unitOfWork.Proveedores.UpdateAsync(proveedorExistente.IdProveedor, proveedorExistente);
         }
 
         //Elimina el proveedor
-        public async Task EliminarProveedorAsync(int id)
+        public async Task EliminarProveedorAsync(string idProveedor)
         {
-            await _proveedorRepository.eliminarProveedorAsync(id);
-            await _proveedorRepository.guardarCambiosAsync();
+            var proveedor = await _unitOfWork.Proveedores.GetByIdAsync(idProveedor);
+            if (proveedor == null)
+                throw new KeyNotFoundException("El Proveedor no existe");
+
+            await _unitOfWork.Proveedores.RemoveAsync(idProveedor);
+        }
+
+        // ----------------- Obtener proveedor por Id -----------------
+        public async Task<Proveedor> ObtenerPorIdProveedorAsync(string idProveedor)
+        {
+            var proveedor = await _unitOfWork.Proveedores.GetByIdAsync(idProveedor);
+            if (proveedor == null)
+                throw new KeyNotFoundException("El Proveedor no existe");
+
+            return proveedor;
         }
 
     }

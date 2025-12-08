@@ -38,10 +38,10 @@
             // dataGridView1
             // 
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(132, 144);
+            dataGridView1.Location = new Point(46, 103);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.RowTemplate.Height = 25;
-            dataGridView1.Size = new Size(827, 318);
+            dataGridView1.Size = new Size(641, 250);
             dataGridView1.TabIndex = 0;
             dataGridView1.CellContentClick += dataGridView1_CellContentClick;
             // 
@@ -50,7 +50,7 @@
             iconButton1.IconChar = FontAwesome.Sharp.IconChar.None;
             iconButton1.IconColor = Color.Black;
             iconButton1.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconButton1.Location = new Point(855, 468);
+            iconButton1.Location = new Point(583, 359);
             iconButton1.Name = "iconButton1";
             iconButton1.Size = new Size(104, 23);
             iconButton1.TabIndex = 1;
@@ -63,7 +63,7 @@
             iconButton2.IconChar = FontAwesome.Sharp.IconChar.None;
             iconButton2.IconColor = Color.Black;
             iconButton2.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconButton2.Location = new Point(132, 468);
+            iconButton2.Location = new Point(46, 359);
             iconButton2.Name = "iconButton2";
             iconButton2.Size = new Size(104, 23);
             iconButton2.TabIndex = 2;
@@ -75,7 +75,7 @@
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Arial Narrow", 18F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point);
-            label1.Location = new Point(132, 110);
+            label1.Location = new Point(46, 69);
             label1.Name = "label1";
             label1.Size = new Size(99, 29);
             label1.TabIndex = 3;
@@ -86,7 +86,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveCaption;
-            ClientSize = new Size(1170, 605);
+            ClientSize = new Size(825, 488);
             Controls.Add(label1);
             Controls.Add(iconButton2);
             Controls.Add(iconButton1);

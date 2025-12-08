@@ -25,6 +25,7 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Contexto
         public IMongoCollection<Cliente> Clientes => _database.GetCollection<Cliente>("Clientes");
         public IMongoCollection<Producto> Productos => _database.GetCollection<Producto>("Productos");
         public IMongoCollection<Usuario> Usuarios => _database.GetCollection<Usuario>("Usuarios");
+        public IMongoCollection<Proveedor> Proveedor => _database.GetCollection<Proveedor>("Proveedores");
 
     }
 }
