@@ -1,0 +1,18 @@
+﻿using EstructuraVentas.Dominio;
+using EstructuraVentas.Dominio.Modelos;
+using EstructuraVentas.Infraestructura.Commons.Bases.Request;
+using EstructuraVentas.Infraestructura.Commons.Bases.Response;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EstructuraVentas.Infraestructura.Persistencia.Interfaces
+{
+    public interface IProveedorRepository:IGenericRepository<Proveedor>
+    {
+        Task<BaseEntityResponse<Proveedor>> ListProveedor(BaseFilterRequest filters);
+
+    }
+}

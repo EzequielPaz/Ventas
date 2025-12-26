@@ -40,6 +40,9 @@
             iconButton6 = new FontAwesome.Sharp.IconButton();
             textBox1 = new TextBox();
             button1 = new Button();
+            botonAnterior = new Button();
+            botonSiguiente = new Button();
+            label3 = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
@@ -72,8 +75,7 @@
             iconButton1.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconButton1.IconSize = 25;
             iconButton1.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton1.Location = new Point(630, 522);
-            iconButton1.Margin = new Padding(3, 4, 3, 4);
+            iconButton1.Location = new Point(713, 564);
             iconButton1.Name = "iconButton1";
             iconButton1.Size = new Size(111, 43);
             iconButton1.TabIndex = 3;
@@ -198,6 +200,36 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
+            // botonAnterior
+            // 
+            botonAnterior.Location = new Point(612, 424);
+            botonAnterior.Name = "botonAnterior";
+            botonAnterior.Size = new Size(75, 23);
+            botonAnterior.TabIndex = 13;
+            botonAnterior.Text = "Anterior";
+            botonAnterior.UseVisualStyleBackColor = true;
+            botonAnterior.Click += botonAnterior_Click;
+            // 
+            // botonSiguiente
+            // 
+            botonSiguiente.Location = new Point(693, 424);
+            botonSiguiente.Name = "botonSiguiente";
+            botonSiguiente.Size = new Size(75, 23);
+            botonSiguiente.TabIndex = 14;
+            botonSiguiente.Text = "Siguiente";
+            botonSiguiente.UseVisualStyleBackColor = true;
+            botonSiguiente.Click += botonSiguiente_Click;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(534, 428);
+            label3.Name = "label3";
+            label3.Size = new Size(38, 15);
+            label3.TabIndex = 15;
+            label3.Text = "label3";
+            label3.Click += label3_Click;
+            // 
             // PanelProveedores
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -239,5 +271,8 @@
         private FontAwesome.Sharp.IconButton iconButton6;
         private TextBox textBox1;
         private Button button1;
+        private Button botonAnterior;
+        private Button botonSiguiente;
+        private Label label3;
     }
 }

@@ -1,7 +1,6 @@
 ﻿using EstructuraVentas.Infraestructura.Commons.Bases.Request;
 using EstructuraVentas.Infraestructura.Commons.Bases.Response;
 using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Linq.Expressions;

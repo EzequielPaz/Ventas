@@ -10,9 +10,14 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Interfaces
         IGenericRepository<Cliente> Clientes { get; }
         IGenericRepository<Producto> Productos { get; }
         IGenericRepository<Categoria> Categorias { get; }
+        IGenericRepository<Proveedor> Proveedores { get; }
+
 
 
         IMongoDatabase Database { get; }
+
+        
+
         IUsuarioRepository Usuarios { get; }
         int SaveChanges();
         Task<int> SaveChangesAsync();

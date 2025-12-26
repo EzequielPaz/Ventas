@@ -1,6 +1,5 @@
 ﻿using EstructuraVentas.Dominio;
 using EstructuraVentas.Dominio.Commons.Enums;
-using EstructuraVentas.Dominio.Modelos;
 using EstructuraVentas.Infraestructura.Commons.Bases.Request;
 using EstructuraVentas.Infraestructura.Commons.Bases.Response;
 using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
@@ -8,7 +7,6 @@ using EstructuraVentas.LogicaNegocio.DTOs.Clientes;
 using EstructuraVentas.LogicaNegocio.Mapper;
 using EstructuraVentas.LogicaNegocio.Validators.Cliente;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 

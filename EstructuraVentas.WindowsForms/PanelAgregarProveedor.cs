@@ -1,22 +1,16 @@
-﻿using EstructuraVentas.Dominio.Modelos;
+﻿using EstructuraVentas.LogicaNegocio.DTOs.Proveedor;
 using EstructuraVentas.LogicaNegocio.Servicios;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace EstructuraVentas.WindowsForms
 {
     public partial class PanelAgregarProveedor : Form
     {
         private readonly IServiceProvider _serviceProvider;
+        public event EventHandler ProveedorAgregado;
+
 
         public PanelAgregarProveedor(IServiceProvider serviceProvider)
         {
@@ -47,79 +41,100 @@ namespace EstructuraVentas.WindowsForms
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            //var razonSocialTexto = textBox1.Text;
-            //var telefonoTexto = textBox2.Text;
-            //var correoTexto = textBox3.Text;
-            //var cuitTexto = textBox4.Text;
-            //var codigoTexto = textBox5.Text;
+            if (string.IsNullOrWhiteSpace(textBox1.Text) ||
+                 string.IsNullOrWhiteSpace(textBox2.Text) ||
+                 string.IsNullOrWhiteSpace(textBox3.Text) ||
+                 string.IsNullOrWhiteSpace(textBox4.Text) ||
+                 string.IsNullOrWhiteSpace(textBox5.Text))
+            {
+                MessageBox.Show("Todos los campos son obligatorios.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var dto = new CreateProveedorDTO
+                {
+                    RazonSocial = textBox1.Text,
+                    CUIT = textBox2.Text,
+                    CodigoProveedor = textBox3.Text,
+                    Telefono = textBox4.Text,
+                    Correo = textBox5.Text
+                };
 
+                try
+                {
+                    var proveedorServiciosScoped = scope.ServiceProvider.GetRequiredService<ProveedorServicio>();
+                    await proveedorServiciosScoped.AgregarProveedorAsync(dto);
 
+                    MessageBox.Show("¡Proveedor registrado con éxito!");
+                    LimpiarTextBox();
+                    ProveedorAgregado?.Invoke(this, EventArgs.Empty);
 
-            ////Validar que todos los campos estén completos
-            //if (string.IsNullOrEmpty(razonSocialTexto) ||
-            //    string.IsNullOrEmpty(telefonoTexto) || 
-            //    string.IsNullOrEmpty(correoTexto) || string.IsNullOrEmpty(cuitTexto) || 
-            //    string.IsNullOrEmpty(codigoTexto))
-            //{
-            //    MessageBox.Show("Debes llenar todos los campos.");
-            //    return;
-            //}
+                    this.Hide(); // opcional: podrías dejarlo abierto para seguir cargando
 
+                }
+                catch (ValidationException vex)
+                {
+                    var errores = string.Join(Environment.NewLine, vex.Errors.Select(e => e.ErrorMessage));
+                    MessageBox.Show("Errores de validación:\n" + errores);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error al registrar usuario: " + ex.Message);
+                }
+            }
 
-            //var nuevoProveedor = new Proveedor
-            //{
-            //    RazonSocial = razonSocialTexto,
-            //    Telefono = telefonoTexto,
-            //    Correo = correoTexto,
-            //    CUIT = cuitTexto,
-            //    CodigoProovedor = codigoTexto,
-            //    FechaDeRegistro = DateTime.Now,
-            //};
-
-            //try
-            //{
-            //    var proveedorServicio = _serviceProvider.GetService<ProveedorServicio>();
-            //    await proveedorServicio.agregarProveedorAsync(nuevoProveedor);
-            //    MessageBox.Show("¡Proveedor registrado con éxito!");
-            //    LimpiarCampos();
-            //    this.Hide();
-
-            //}
-            //catch (ValidationException ex)
-            //{
-            //    MessageBox.Show(ex.Message, "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            //}
-
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show("Error al registrar usuario: " + ex.Message);
-            //}
-            
+        }
+        private void LimpiarTextBox()
+        {
+            textBox1.Clear();
+            textBox2.Clear();
+            textBox3.Clear();
+            textBox4.Clear();
+            textBox5.Clear();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
+            LimpiarTextBox();
             this.Hide();
         }
 
         private void PanelAgregarProveedor_Load(object sender, EventArgs e)
         {
-           
+
         }
 
         private void PanelAgregarProveedor_Load_1(object sender, EventArgs e)
         {
 
         }
-        //private void LimpiarCampos()
-        //{
-        //    textBox1.Clear();
-        //    textBox2.Clear();
-        //    textBox3.Clear();
-        //    textBox4.Clear();
-        //    textBox5.Clear();
-        //}
+
+        private void textBox1_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox2_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox3_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox4_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox5_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
 
 
     }
