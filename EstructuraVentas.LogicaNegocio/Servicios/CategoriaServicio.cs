@@ -51,7 +51,7 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
         }
 
         // ----------------- Mostrar Categorías -----------------
-        public async Task<BaseEntityResponse<Categoria>> MostrarCategoriasAsync(BaseFilterRequest? filters = null)
+        public async Task<BaseEntityResponse<CategoriaDTO>> MostrarCategoriasAsync(BaseFilterRequest? filters = null)
         {
             filters ??= new BaseFilterRequest();
 
@@ -60,12 +60,25 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
                 EF.Functions.Like(c.Nombre, $"%{filters.TextFilter}%");
 
             var response = await _unitOfWork.Categorias.ListAsync(
-            filters,
-            filtro,
-            include: q => q.Include(c => c.Productos)
+                filters,
+                filtro,
+                include: q => q.Include(c => c.Productos)
             );
 
-            return response;
+            // Mapear entidades a DTOs
+            var dtoResponse = new BaseEntityResponse<CategoriaDTO>
+            {
+                TotalRecords = response.TotalRecords,
+                Records = response.Records.Select(c => new CategoriaDTO
+                {
+                    IdCategoria = c.IdCategoria,
+                    Nombre = c.Nombre,
+                    Descripcion = c.Descripcion,
+                    CantidadProductos = c.Productos?.Count ?? 0
+                }).ToList()
+            };
+
+            return dtoResponse;
         }
 
         // ----------------- Modificar Categoría -----------------

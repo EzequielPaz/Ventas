@@ -1,4 +1,5 @@
 ﻿using EstructuraVentas.Dominio.Modelos;
+using EstructuraVentas.LogicaNegocio.DTOs.Proveedor;
 using EstructuraVentas.LogicaNegocio.Servicios;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -53,49 +54,44 @@ namespace EstructuraVentas.WindowsForms
             var cuitTexto = textBox4.Text;
             var codigoTexto = textBox5.Text;
 
-
-
-
-            //Validar que todos los campos estén completos
             if (string.IsNullOrEmpty(razonSocialTexto) ||
-                string.IsNullOrEmpty(telefonoTexto) || 
-                string.IsNullOrEmpty(correoTexto) || string.IsNullOrEmpty(cuitTexto) || 
+                string.IsNullOrEmpty(telefonoTexto) ||
+                string.IsNullOrEmpty(correoTexto) ||
+                string.IsNullOrEmpty(cuitTexto) ||
                 string.IsNullOrEmpty(codigoTexto))
             {
                 MessageBox.Show("Debes llenar todos los campos.");
                 return;
             }
 
-
-            var nuevoProveedor = new Proveedor
+            var nuevoProveedorDto = new CreateProveedorDto
             {
                 RazonSocial = razonSocialTexto,
                 Telefono = telefonoTexto,
                 Correo = correoTexto,
                 CUIT = cuitTexto,
-                CodigoProovedor = codigoTexto,
-                FechaDeRegistro = DateTime.Now,
+                CodigoProveedor = codigoTexto
             };
 
             try
             {
                 var proveedorServicio = _serviceProvider.GetService<ProveedorServicio>();
-                await proveedorServicio.agregarProveedorAsync(nuevoProveedor);
+                await proveedorServicio.AgregarProveedor(nuevoProveedorDto);
+
                 MessageBox.Show("¡Proveedor registrado con éxito!");
                 LimpiarCampos();
                 this.Hide();
-
             }
             catch (ValidationException ex)
             {
                 MessageBox.Show(ex.Message, "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-
             catch (Exception ex)
             {
                 MessageBox.Show("Error al registrar usuario: " + ex.Message);
             }
-            
+
+
         }
 
         private void button2_Click(object sender, EventArgs e)

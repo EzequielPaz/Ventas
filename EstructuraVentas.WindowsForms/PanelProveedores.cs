@@ -1,5 +1,6 @@
 ﻿using EstructuraVentas.Dominio;
 using EstructuraVentas.Dominio.Modelos;
+using EstructuraVentas.Infraestructura.Commons.Bases.Request;
 using EstructuraVentas.LogicaNegocio.Servicios;
 using Microsoft.Extensions.DependencyInjection;
 using OfficeOpenXml;
@@ -18,19 +19,22 @@ namespace EstructuraVentas.WindowsForms
     public partial class PanelProveedores : Form
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ProveedorServicio _proveedorServicio;
-        private List<Proveedor> proveedores;
-        private List<Proveedor> _proveedoresOriginales; //Para el filtro
+
+        // Lista real de proveedores devuelta por Mongo
+        private List<Proveedor> _proveedoresOriginales = new();
+
+        private ProveedorFilterRequest _filtroActual = new ProveedorFilterRequest();
+
+        // PAGINACIÓN
+        private int _paginaActual = 1;
+        private const int _tamanioPagina = 10;
+        private int _totalPaginas = 0;
+
 
         public PanelProveedores(IServiceProvider serviceProvider)
         {
             InitializeComponent();
             _serviceProvider = serviceProvider;
-            _proveedorServicio = _serviceProvider.GetRequiredService<ProveedorServicio>();
-            // this.textBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
-            ExcelPackage.LicenseContext = ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-
-
             this.CenterToScreen();
 
         }
@@ -66,45 +70,62 @@ namespace EstructuraVentas.WindowsForms
         {
             if (dataGridView1.SelectedRows.Count > 0)
             {
-                // Obtener la fila seleccionada
                 DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
+                int idCliente = Convert.ToInt32(filaSeleccionada.Cells["IdProveedor"].Value);
 
-                // Obtener el ID de la columna "Id"
-                int idProveedor = Convert.ToInt32(filaSeleccionada.Cells["IdProveedor"].Value);
-
-                // Abrir el formulario de edición pasando el ID
-                var panelEditarProveedor = new PanelEditarProveedor(_serviceProvider, idProveedor);
-                panelEditarProveedor.ShowDialog(); ;
-
-
+                var panelModificarProveedor = new PanelEditarProveedor(_serviceProvider, idCliente);
+                panelModificarProveedor.ShowDialog();
             }
             else
             {
-                MessageBox.Show("Por favor, seleccione un proveedor para editar.");
+                MessageBox.Show("Por favor, seleccione un cliente");
             }
         }
 
 
         private async Task CargarProveedoresAsync()
         {
+
             try
             {
-                //proveedores = await _proveedorServicio.mostrarProveedoresAsync(); SE REMPLAZA PARA UTILIZAR EL FILTRO
-                //dataGridView1.DataSource = proveedores;
-                _proveedoresOriginales = await _proveedorServicio.mostrarProveedoresAsync(); // ← importante
-                dataGridView1.DataSource = _proveedoresOriginales;
-                dataGridView1.ClearSelection();
+                // Asignamos paginación
+                _filtroActual.PageIndex = _paginaActual;
+                _filtroActual.Records = _tamanioPagina;
 
-                if (dataGridView1.Columns.Contains("IdProveedor"))
-                    dataGridView1.Columns["IdProveedor"].Visible = true;
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var proveedorServicio = scope.ServiceProvider.GetRequiredService<ProveedorServicio>();
 
-                if (dataGridView1.Columns.Contains("FechaDeRegistro"))
-                    dataGridView1.Columns["FechaDeRegistro"].DefaultCellStyle.Format = "dd/MM/yyyy";
+                    // ✔ Ahora sí llamamos al método correcto
+                    var response = await proveedorServicio.MostrarProveedores(_filtroActual);
+
+                    // Cargamos registros reales
+                    _proveedoresOriginales = response.Records ?? new List<Proveedor>();
+                    dataGridView1.DataSource = _proveedoresOriginales;
+
+                    // Calculamos páginas
+                    if (response.TotalRecords.HasValue && response.TotalRecords.Value > 0)
+                    {
+                        _totalPaginas = (int)Math.Ceiling((double)response.TotalRecords.Value / _tamanioPagina);
+                    }
+                    else
+                    {
+                        _totalPaginas = 0;
+                    }
+
+                    ActualizarControlesPaginacion();
+
+                    // Formato de columnas
+                    if (dataGridView1.Columns.Contains("FechaDeRegistro"))
+                        dataGridView1.Columns["FechaDeRegistro"].DefaultCellStyle.Format = "dd/MM/yyyy";
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar los proveedores:\n{ex.Message}\n{ex.InnerException?.Message}");
+                MessageBox.Show($"Error al cargar proveedores:\n{ex.Message}",
+                                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
         }
 
         private async void iconButton4_Click(object sender, EventArgs e)
@@ -118,39 +139,40 @@ namespace EstructuraVentas.WindowsForms
 
         }
 
-        public async Task EliminarProveedorAsync()
+        private async Task EliminarProveedorAsync()
         {
-            if (dataGridView1.SelectedRows.Count > 0)
+            if (dataGridView1.SelectedRows.Count == 0)
             {
-                DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
-                int idProveedor = Convert.ToInt32(filaSeleccionada.Cells["IdProveedor"].Value);
-
-                var proveedor = await _proveedorServicio.obtenerProveedorPorId(idProveedor);
-
-                if (proveedor != null)
-                {
-                    var confirmResult = MessageBox.Show(
-                        $"¿Está seguro de que desea eliminar el proveedor: {proveedor.CodigoProovedor}?",
-                        "Confirmar eliminación",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Warning);
-
-                    if (confirmResult == DialogResult.Yes)
-                    {
-                        await _proveedorServicio.EliminarProveedorAsync(idProveedor);
-                        MessageBox.Show("Proveedor eliminado correctamente.");
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("El proveedor no fue encontrado.");
-                }
+                MessageBox.Show("Seleccione un proveedor.");
+                return;
             }
-            else
+
+            int id = Convert.ToInt32(dataGridView1.SelectedRows[0].Cells["IdProveedor"].Value);
+
+            using (var scope = _serviceProvider.CreateScope())
             {
-                MessageBox.Show("Por favor, seleccione un proveedor para eliminar.");
+                var servicio = scope.ServiceProvider.GetRequiredService<ProveedorServicio>();
+
+                var proveedor = await servicio.ObtenerPorId(id);
+                if (proveedor == null)
+                {
+                    MessageBox.Show("Proveedor no encontrado.");
+                    return;
+                }
+
+                var confirm = MessageBox.Show(
+                    $"¿Eliminar proveedor {proveedor.RazonSocial}?",
+                    "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                if (confirm == DialogResult.Yes)
+                {
+                    await servicio.Eliminar(id);
+                    MessageBox.Show("Proveedor eliminado.");
+                    await CargarProveedoresAsync();
+                }
             }
         }
+
 
         private void label1_Click(object sender, EventArgs e)
         {
@@ -320,7 +342,7 @@ namespace EstructuraVentas.WindowsForms
                     break;
 
                 case "Codigo Proveedor":
-                    filtrados = _proveedoresOriginales.Where(c => c.CodigoProovedor.Contains(filtro, StringComparison.OrdinalIgnoreCase));
+                    filtrados = _proveedoresOriginales.Where(c => c.CodigoProveedor.Contains(filtro, StringComparison.OrdinalIgnoreCase));
                     break;
 
                 case "Telefono":
@@ -346,6 +368,50 @@ namespace EstructuraVentas.WindowsForms
             }
 
             dataGridView1.DataSource = filtrados.ToList();
+        }
+
+        private async void button2_Click(object sender, EventArgs e)
+        {
+            if (_paginaActual > 1)
+            {
+                _paginaActual--;
+                await CargarProveedoresAsync();
+            }
+        }
+
+        private async void button3_Click(object sender, EventArgs e)
+        {
+            if (_paginaActual < _totalPaginas)
+            {
+                _paginaActual++;
+                await CargarProveedoresAsync();
+            }
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ActualizarControlesPaginacion()
+        {
+            // --- Lógica para el Label (label3) ---
+            if (_totalPaginas > 0)
+            {
+                label3.Text = $"Página {_paginaActual} de {_totalPaginas}";
+            }
+            else
+            {
+                label3.Text = "No hay Proveedores para mostrar.";
+            }
+
+            // --- Lógica para Botones (button6: Anterior, button7: Siguiente) ---
+
+            // Deshabilita el botón de Anterior si estamos en la primera página
+            botonAnterior.Enabled = _paginaActual > 1;
+
+            // Deshabilita el botón de Siguiente si estamos en la última página
+            botonSiguiente.Enabled = _paginaActual < _totalPaginas;
         }
     }
 }

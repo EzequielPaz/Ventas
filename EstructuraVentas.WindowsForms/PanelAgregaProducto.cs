@@ -3,6 +3,7 @@ using EstructuraVentas.Dominio.Modelos;
 using EstructuraVentas.LogicaNegocio.DTOs.Producto;
 using EstructuraVentas.LogicaNegocio.Servicios;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net.WebSockets;
 
 namespace EstructuraVentas.WindowsForms
 {
@@ -84,30 +85,38 @@ namespace EstructuraVentas.WindowsForms
 
             int categoriaId = (int)comboBox1.SelectedValue;
 
-            // Crear DTO
-            var productDTO = new CreateProductDTO
-            {
-                Nombre = textBox1.Text,
-                Descripcion = textBox2.Text,
-                Codigo = textBox3.Text,
-                Stock = stock,
-                Marca = textBox5.Text,
-                Precio = precio,
-                CategoriaId = categoriaId
-            };
 
-            try
+            using (var scope = _serviceProvider.CreateScope())
             {
-                await _productoServicios.AgregarProducto(productDTO);
-                MessageBox.Show("¡Producto registrado con éxito!");
-                ProductoAgregado?.Invoke(this, EventArgs.Empty);
-                LimpiarCampos();
-                this.Hide();
+                // Crear DTO
+                var productDTO = new CreateProductDTO
+                {
+                    Nombre = textBox1.Text,
+                    Descripcion = textBox2.Text,
+                    Codigo = textBox3.Text,
+                    Stock = stock,
+                    Marca = textBox5.Text,
+                    Precio = precio,
+                    CategoriaId = categoriaId
+                };
+
+                try
+                {
+                    var productoServiciosScoped = scope.ServiceProvider.GetRequiredService<ProductoServicios>();
+                    await productoServiciosScoped.AgregarProducto(productDTO);
+                    MessageBox.Show("¡Producto registrado con éxito!");
+                    ProductoAgregado?.Invoke(this, EventArgs.Empty);
+                    LimpiarCampos();
+                    this.Hide();
+
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show($"Error al registrar producto: {ex.Message}");
+                }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al registrar producto: {ex.Message}");
-            }
+
+           
         }
         private void LimpiarCampos()
         {
@@ -135,28 +144,38 @@ namespace EstructuraVentas.WindowsForms
 
         }
 
+        private async Task CargarCategoriasAsync()
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                try
+                {
+                    var categoriaServicio = scope.ServiceProvider.GetRequiredService<CategoriaServicio>();
+                    var categoriasResponse = await categoriaServicio.MostrarCategoriasAsync();
+
+                    if (categoriasResponse == null || categoriasResponse.Records == null || !categoriasResponse.Records.Any())
+                    {
+                        MessageBox.Show("No hay categorías registradas. Debes crear al menos una antes de agregar productos.");
+                        this.Hide();
+                        return;
+                    }
+                    MessageBox.Show($"Se encontraron {categoriasResponse.Records.Count()} categorías.");
+
+
+                    comboBox1.DataSource = categoriasResponse.Records;
+                    comboBox1.DisplayMember = "Nombre";
+                    comboBox1.ValueMember = "IdCategoria";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error al cargar categorías: {ex.Message}");
+                }
+            }
+        }
+
         private async void PanelAgregaProducto_Load(object sender, EventArgs e)
         {
-            try
-            {
-                var categoriasResponse = await _categoriaServicio.MostrarCategoriasAsync();
-
-                if (categoriasResponse == null || categoriasResponse.Records == null || !categoriasResponse.Records.Any())
-                {
-                    MessageBox.Show("No hay categorías registradas. Debes crear al menos una antes de agregar productos.");
-                    this.Hide();
-                    return;
-                }
-
-                comboBox1.DataSource = categoriasResponse.Records;
-                comboBox1.DisplayMember = "Nombre";   // lo que se muestra al usuario
-                comboBox1.ValueMember = "IdCategoria"; // el valor que se usará internamente
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar categorías: {ex.Message}");
-            }
-
+            await CargarCategoriasAsync();
 
         }
 
@@ -165,10 +184,10 @@ namespace EstructuraVentas.WindowsForms
 
         }
 
-        private void textBox7_TextChanged(object sender, EventArgs e)
-        {
+        //private void textBox7_TextChanged(object sender, EventArgs e)
+        //{
 
-        }
+        //}
 
         private void comboBox1_SelectedIndexChanged_1(object sender, EventArgs e)
         {

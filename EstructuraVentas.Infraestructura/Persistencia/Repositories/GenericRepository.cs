@@ -25,22 +25,10 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
             if (include != null)
                 query = include(query);
 
-            var entity = await _dbSet.FindAsync(id);
+            var keyProperty = _context.Model.FindEntityType(typeof(T))?.FindPrimaryKey()?.Properties.First();
+            var keyName = keyProperty?.Name ?? "Id";
 
-            if (entity == null)
-                return null;
-
-            // Si se pidió include, EF no lo carga con FindAsync
-            if (include != null)
-            {
-                var keyProperty = _context.Model.FindEntityType(typeof(T))?.FindPrimaryKey()?.Properties.First();
-                var keyName = keyProperty?.Name ?? "Id";
-                var keyValue = typeof(T).GetProperty(keyName)?.GetValue(entity);
-
-                return await query.FirstOrDefaultAsync(e => EF.Property<object>(e, keyName).Equals(keyValue));
-            }
-
-            return entity;
+            return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, keyName) == id);
         }
 
         public async Task<IEnumerable<T>> GetAllAsync() =>
@@ -74,8 +62,10 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
             if (extraFilter != null)
                 query = query.Where(extraFilter);
 
-            // 🔹 Orden por defecto (importante para paginación estable)
-            query = query.OrderBy(e => EF.Property<object>(e, "Id" + typeof(T).Name));
+            var keyProperty = _context.Model.FindEntityType(typeof(T))?.FindPrimaryKey()?.Properties.First();
+            var keyName = keyProperty?.Name ?? "Id";
+
+            query = query.OrderBy(e => EF.Property<object>(e, keyName));
 
             var totalRecords = await query.CountAsync();
             var items = await query

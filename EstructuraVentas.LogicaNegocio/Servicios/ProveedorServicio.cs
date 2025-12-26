@@ -1,80 +1,124 @@
 ﻿using EstructuraVentas.Dominio.Modelos;
-using EstructuraVentas.Dominio.Validators;
-using EstructuraVentas.Infraestructura.Persistencia.Repositories;
+using EstructuraVentas.Infraestructura.Commons.Bases.Request;
+using EstructuraVentas.Infraestructura.Commons.Bases.Response;
+using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
+using EstructuraVentas.LogicaNegocio.DTOs.Proveedor;
+using EstructuraVentas.LogicaNegocio.Validators.Proveedor;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace EstructuraVentas.LogicaNegocio.Servicios
 {
     public class ProveedorServicio
     {
-        //variables de clase
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IProveedorRepository _proveedorRepository;
-        private readonly ProveedorValidator _validator;
+        private readonly IUnitOfWorkMongo _uow;
+        private readonly CreateProveedorValidator _valCreate;
+        private readonly UpdateProveedorValidator _valUpdate;
+
 
         //CONSTRUCTOR
-        public ProveedorServicio(IServiceProvider serviceProvider)
+        public ProveedorServicio(IUnitOfWorkMongo uow)
         {
-            _serviceProvider = serviceProvider;
-            _proveedorRepository = _serviceProvider.GetRequiredService<IProveedorRepository>();
-            _validator = new ProveedorValidator();
+            _uow = uow;
+            _valCreate = new CreateProveedorValidator();
+            _valUpdate = new UpdateProveedorValidator();
+
         }
 
-        //Agregar proveedor
-
-        public async Task agregarProveedorAsync(Proveedor proveedor) 
+        // 🔹 Genera ID autoincremental manual para Mongo
+        private async Task<int> ObtenerNuevoId()
         {
-            var resultado = _validator.Validate(proveedor);
+            var lista = await _uow.Proveedores.GetAsync();
+            return lista.Count == 0 ? 1 : lista.Max(x => x.IdProveedor) + 1;
+        }
 
-            if (!resultado.IsValid)
+
+        // ----------------- Agregar -----------------
+        public async Task AgregarProveedor(CreateProveedorDto dto)
+        {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
+
+            var validation = _valCreate.Validate(dto);
+            if (!validation.IsValid)
+                throw new ValidationException(validation.Errors);
+
+            var proveedor = new Proveedor
             {
-                var errores = string.Join(Environment.NewLine, resultado.Errors.Select(e => e.ErrorMessage));
-                throw new ValidationException(errores);
-            }
+                IdProveedor = await ObtenerNuevoId(),
+                RazonSocial = dto.RazonSocial,
+                CUIT = dto.CUIT,
+                CodigoProveedor = dto.CodigoProveedor,
+                Telefono = dto.Telefono,
+                Correo = dto.Correo,
+                FechaDeRegistro = DateTime.Now
+            };
 
-            await _proveedorRepository.agregarProveedorAsync(proveedor);
-         
+            await _uow.Proveedores.AddAsync(proveedor);
         }
 
-        //Muestra todos en el data grid view 
 
-        public async Task<List<Proveedor>> mostrarProveedoresAsync()
+        // ----------------- FILTROS SIMPLES(sin paginación Mongo) -----------------
+        public async Task<BaseEntityResponse<Proveedor>> MostrarProveedores(ProveedorFilterRequest? filters = null)
         {
-            try
+            filters ??= new ProveedorFilterRequest();
+
+            var (data, total) = await _uow.Proveedores.ListPagedAsync(
+                filters.PageIndex,
+                filters.Records,
+                null
+            );
+
+            return new BaseEntityResponse<Proveedor>
             {
-                var proveedores = await _proveedorRepository.mostrarProveedoresAsync();
-                return proveedores;
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Error al obtener los proveedores.", ex);
-            }
+                TotalRecords = (int)total,
+                Records = data
+            };
         }
 
-        //Obtiene el proveedor por su id 
-        public async Task<Proveedor> obtenerProveedorPorId(int id)
+
+
+
+        public async Task<List<Proveedor>> ObtenerTodos()
         {
-            return await _proveedorRepository.Proveedores
-        .AsNoTracking()
-        .FirstOrDefaultAsync(p => p.IdProveedor == id);
-
+            return await _uow.Proveedores.GetAsync();
         }
 
-        //Edita el proveedor 
-        public async Task ActualizarProveedorAsync(Proveedor proveedor)
+
+        public async Task<Proveedor> ObtenerPorId(int id)
         {
-            await _proveedorRepository.actualizarProveedorAsync(proveedor);
-            await _proveedorRepository.guardarCambiosAsync();
+            var proveedor = await _uow.Proveedores.GetByIdAsync(id);
+            if (proveedor == null)
+                throw new KeyNotFoundException("Proveedor no existe");
+
+            return proveedor;
         }
 
-        //Elimina el proveedor
-        public async Task EliminarProveedorAsync(int id)
+
+        public async Task Actualizar(UpdateProveedorDto dto)
         {
-            await _proveedorRepository.eliminarProveedorAsync(id);
-            await _proveedorRepository.guardarCambiosAsync();
+            var validation = _valUpdate.Validate(dto);
+            if (!validation.IsValid)
+                throw new ValidationException(validation.Errors);
+
+            var existente = await _uow.Proveedores.GetByIdAsync(dto.IdProveedor);
+            if (existente == null)
+                throw new KeyNotFoundException("Proveedor no encontrado");
+
+            existente.RazonSocial = dto.RazonSocial;
+            existente.CUIT = dto.CUIT;
+            existente.CodigoProveedor = dto.CodigoProveedor;
+            existente.Telefono = dto.Telefono;
+            existente.Correo = dto.Correo;
+
+            await _uow.Proveedores.UpdateAsync(existente, existente.IdProveedor);
         }
+
+        public async Task Eliminar(int id)
+        {
+            await _uow.Proveedores.DeleteAsync(id);
+        }
+
+
 
     }
 }

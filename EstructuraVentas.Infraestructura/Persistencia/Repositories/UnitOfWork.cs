@@ -11,6 +11,7 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
         public IGenericRepository<Cliente> Clientes { get;  }
         public IGenericRepository<Producto> Productos { get; }
         public IGenericRepository<Categoria> Categorias { get; }
+        public IGenericRepository<Proveedor> Proveedores { get; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -18,6 +19,7 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
             Clientes = new GenericRepository<Cliente>(_context);
             Productos = new GenericRepository<Producto>(_context);
             Categorias = new GenericRepository<Categoria>(_context);
+            Proveedores = new GenericRepository<Proveedor>(_context);
 
         }
 

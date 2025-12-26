@@ -1,5 +1,7 @@
 ﻿using EstructuraVentas.Dominio;
+using EstructuraVentas.Dominio.Modelos;
 using EstructuraVentas.LogicaNegocio.DTOs.Clientes;
+using EstructuraVentas.LogicaNegocio.DTOs.Proveedor;
 
 namespace EstructuraVentas.LogicaNegocio.Mapper
 {

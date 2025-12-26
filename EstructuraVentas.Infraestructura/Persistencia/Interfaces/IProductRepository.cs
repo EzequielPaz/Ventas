@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 
 namespace EstructuraVentas.Infraestructura.Persistencia.Interfaces
 {
-    public interface IProductRepository
+    public interface IProductRepository : IGenericRepository<Producto>
     {
-        Task<BaseEntityResponse<Producto>> ListProductos(BaseFilterRequest filters);
+        
     }
 }

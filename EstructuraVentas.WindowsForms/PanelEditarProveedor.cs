@@ -1,4 +1,5 @@
 ﻿using EstructuraVentas.Dominio.Modelos;
+using EstructuraVentas.LogicaNegocio.DTOs.Proveedor;
 using EstructuraVentas.LogicaNegocio.Servicios;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -67,7 +68,7 @@ namespace EstructuraVentas.WindowsForms
                 var proveedorActualizado = ObtenerProveedorDesdeFormulario();
 
                 // Llamás al servicio para actualizar
-                await _proveedorServicio.ActualizarProveedorAsync(proveedorActualizado);
+                await _proveedorServicio.Actualizar(proveedorActualizado);
 
                 MessageBox.Show("Proveedor actualizado correctamente.");
                 this.Close();  // Cerrás el formulario si querés
@@ -89,7 +90,7 @@ namespace EstructuraVentas.WindowsForms
         public async Task CargarDatosProveedor(int id)
         {
 
-            var proveedor = await _proveedorServicio.obtenerProveedorPorId(id);
+            var proveedor = await _proveedorServicio.ObtenerPorId(id);
 
             if (proveedor != null)
             {
@@ -97,7 +98,7 @@ namespace EstructuraVentas.WindowsForms
                 textBox2.Text = proveedor.Telefono;
                 textBox3.Text = proveedor.Correo;
                 textBox4.Text = proveedor.CUIT;
-                textBox5.Text = proveedor.CodigoProovedor;
+                textBox5.Text = proveedor.CodigoProveedor;
             }
             else
             {
@@ -107,18 +108,22 @@ namespace EstructuraVentas.WindowsForms
 
         }
 
-        public Proveedor ObtenerProveedorDesdeFormulario()
+        public UpdateProveedorDto ObtenerProveedorDesdeFormulario()
         {
-            return new Proveedor
+
+            return new UpdateProveedorDto
             {
-                IdProveedor = _proveedorId,  // Usamos el id que recibiste en el constructor
+                IdProveedor = _proveedorId,  // si tenés el ID en un textbox
                 RazonSocial = textBox1.Text,
                 Telefono = textBox2.Text,
                 Correo = textBox3.Text,
                 CUIT = textBox4.Text,
-                CodigoProovedor = textBox5.Text
+                CodigoProveedor = textBox5.Text
             };
+
         }
+
+
 
 
     }

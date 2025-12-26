@@ -1,10 +1,11 @@
 ﻿using EstructuraVentas.Dominio;
+using EstructuraVentas.Dominio.Commons.Enums;
 using EstructuraVentas.Infraestructura.Commons.Bases.Request;
 using EstructuraVentas.Infraestructura.Commons.Bases.Response;
 using EstructuraVentas.Infraestructura.Persistencia.Contexto;
 using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using EstructuraVentas.Dominio.Commons.Enums;
 
 namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
 {
@@ -17,22 +18,20 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
         // Listado con filtros y paginación
         public async Task<BaseEntityResponse<Producto>> ListProductos(BaseFilterRequest filters)
         {
-            // Normalizamos filtros
-            string texto = filters.TextFilter?.Trim().ToLower();
+            string texto = filters.TextFilter?.Trim();
             Estado? estado = filters.StateFilter.HasValue
-                ? (Estado?)filters.StateFilter.Value
-                : null;
+                             ? (Estado?)filters.StateFilter.Value
+                             : null;
 
-            // Construimos expresión de filtrado
             Expression<Func<Producto, bool>> filtro = p =>
                 (string.IsNullOrEmpty(texto) ||
-                    p.Nombre.ToLower().Contains(texto) ||
-                    (p.Descripcion != null && p.Descripcion.ToLower().Contains(texto)) ||
-                    (p.Marca != null && p.Marca.ToLower().Contains(texto)) ||
-                    p.Codigo.ToLower().Contains(texto)) &&
+                    EF.Functions.Like(p.Nombre, $"%{texto}%") ||
+                    (p.Descripcion != null && EF.Functions.Like(p.Descripcion, $"%{texto}%")) ||
+                    (p.Marca != null && EF.Functions.Like(p.Marca, $"%{texto}%")) ||
+                    (p.Codigo != null && EF.Functions.Like(p.Codigo, $"%{texto}%"))
+                ) &&
                 (!estado.HasValue || p.Estado == estado.Value);
 
-            // Llamada al método genérico
             return await ListAsync(filters, filtro);
         }
 
@@ -55,7 +54,7 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
         }
 
         // Eliminar producto (sin SaveChanges, lo hace UnitOfWork)
-        public void DeleteClient(Producto product)
+        public void DeleteProduct(Producto product)
         {
             Remove(product);
         }

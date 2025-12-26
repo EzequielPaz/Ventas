@@ -19,8 +19,6 @@ namespace EstructuraVentas.LogicaNegocio.DTOs.Producto
         public string Marca { get; set; }
         public int Stock { get; set; }
         public decimal Precio { get; set; }
-
-        // 🔹 Agregá estas dos propiedades si no las tenés
         public int CategoriaId { get; set; }
         public string CategoriaNombre { get; set; }
 
