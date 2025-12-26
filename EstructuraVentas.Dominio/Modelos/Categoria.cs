@@ -1,28 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EstructuraVentas.Dominio;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace EstructuraVentas.Dominio.Modelos
 {
     public class Categoria
     {
-        [Key]
-        public int IdCategoria { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string CatId { get; set; }
 
+        public int CategoriaId { get; set; } = 0;
+
+        //[BsonElement("Nombre")]
         public string Nombre { get; set; }
 
+        //[BsonElement("Descripcion")]
         public string Descripcion { get; set; }
 
-        // Relación: Una categoría puede tener muchos productos
         public ICollection<Producto> Productos { get; set; }
 
         public override string ToString()
         {
             return Nombre;
         }
-
     }
 }

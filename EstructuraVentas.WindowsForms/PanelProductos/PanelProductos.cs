@@ -71,12 +71,13 @@ namespace EstructuraVentas.WindowsForms
             if (dataGridView1.SelectedRows.Count > 0)
             {
                 DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
-                int idProducto = Convert.ToInt32(filaSeleccionada.Cells["IdProducto"].Value);
+                //int idProducto = Convert.ToInt32(filaSeleccionada.Cells["IdProducto"].Value);
+                string idProducto = filaSeleccionada.Cells["IdProducto"].Value.ToString();
 
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var productoServiciosScoped = scope.ServiceProvider.GetRequiredService<ProductoServicios>();
-                    var producto = await productoServiciosScoped.ObtenerPorIdProductoeAsync(idProducto);
+                    var producto = await productoServiciosScoped.ObtenerPorIdProductoAsync(idProducto);
 
                     if (producto != null)
                     {
@@ -186,7 +187,7 @@ namespace EstructuraVentas.WindowsForms
         private async void PanelProductos_Load(object sender, EventArgs e)
         {
             dataGridView1.ReadOnly = true;
-            await CargarProductoAsync();
+            //await CargarProductoAsync();
         }
 
         //Filtro de productos
@@ -211,13 +212,9 @@ namespace EstructuraVentas.WindowsForms
             switch (columna)
             {
                 case "IdProducto":
-                    if (int.TryParse(filtro, out int id))
-                        filtrados = _productosOriginales.Where(c => c.IdProducto == id);
-                    else
-                    {
-                        MessageBox.Show("El ID debe ser numérico.");
-                        return;
-                    }
+                    filtrados = _productosOriginales
+                        .Where(c => c.IdProducto != null &&
+                                    c.IdProducto.Contains(filtro, StringComparison.OrdinalIgnoreCase));
                     break;
 
                 case "Nombre Producto":

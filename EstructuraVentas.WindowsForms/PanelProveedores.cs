@@ -324,14 +324,11 @@ namespace EstructuraVentas.WindowsForms
             switch (columna)
             {
                 case "IdProveedor":
-                    if (int.TryParse(filtro, out int id))
-                        filtrados = _proveedoresOriginales.Where(c => c.IdProveedor == id);
-                    else
-                    {
-                        MessageBox.Show("El ID debe ser numérico.");
-                        return;
-                    }
+                    filtrados = _proveedoresOriginales.Where(c =>
+                        c.IdProveedor != null &&
+                        c.IdProveedor.Contains(filtro, StringComparison.OrdinalIgnoreCase));
                     break;
+
 
                 case "Razon Social":
                     filtrados = _proveedoresOriginales.Where(c => c.RazonSocial.Contains(filtro, StringComparison.OrdinalIgnoreCase));

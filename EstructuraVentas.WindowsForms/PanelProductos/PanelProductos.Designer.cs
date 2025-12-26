@@ -201,7 +201,8 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1214, 621);
+            BackColor = Color.SkyBlue;
+            ClientSize = new Size(825, 488);
             Controls.Add(LabelPaginacion);
             Controls.Add(botonSiguiente);
             Controls.Add(botonAnterior);

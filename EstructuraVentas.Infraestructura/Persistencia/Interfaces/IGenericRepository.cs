@@ -1,5 +1,6 @@
 ﻿using EstructuraVentas.Infraestructura.Commons.Bases.Request;
 using EstructuraVentas.Infraestructura.Commons.Bases.Response;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace EstructuraVentas.Infraestructura.Persistencia.Interfaces
@@ -18,12 +19,10 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Interfaces
         // Eliminar registro
         void Remove(T entity);
 
-        // Método genérico con filtros y paginación
         Task<BaseEntityResponse<T>> ListAsync(
-    BaseFilterRequest filters,
-    Expression<Func<T, bool>>? extraFilter = null,
-    Func<IQueryable<T>, IQueryable<T>>? include = null
-);
-
+            BaseFilterRequest filters,
+            Expression<Func<T, bool>>? extraFilter = null
+            //Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null
+        );
     }
 }

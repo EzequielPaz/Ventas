@@ -12,6 +12,8 @@ using EstructuraVentas.LogicaNegocio.Validators.Cliente;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +36,27 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
             _validatorUpdate = new UpdateCategoriaDTOValidator();
         }
 
+        //----------------- Método para obtener el siguiente CategoriaId -----------------
+        private async Task<int> GetNextCategoriaIdAsync()
+        {
+            var filter = Builders<BsonDocument>.Filter.Eq("_id", "categoriaid");
+            var update = Builders<BsonDocument>.Update.Inc("sequence_value", 1);
+
+            var options = new FindOneAndUpdateOptions<BsonDocument>
+            {
+                ReturnDocument = ReturnDocument.After,
+                IsUpsert = true
+            };
+
+            // Suponiendo que tu _unitOfWork tiene acceso a la DB
+            var countersCollection = _unitOfWork.Database.GetCollection<BsonDocument>("counters");
+            var result = await countersCollection.FindOneAndUpdateAsync(filter, update, options);
+
+            return result["sequence_value"].AsInt32;
+        }
+
+
+
         // ----------------- Agregar Categoría -----------------
         public async Task AgregarCategoriaAsync(CreateCategoriaDTO dto)
         {
@@ -46,10 +69,13 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
 
             var categoria = dto.ToEntity();
 
+            // Asignar CategoriaId autoincremental
+            categoria.CategoriaId = await GetNextCategoriaIdAsync();
+
             await _unitOfWork.Categorias.AddAsync(categoria);
             await _unitOfWork.SaveChangesAsync();
         }
-
+        /*
         // ----------------- Mostrar Categorías -----------------
         public async Task<BaseEntityResponse<CategoriaDTO>> MostrarCategoriasAsync(BaseFilterRequest? filters = null)
         {
@@ -57,13 +83,10 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
 
             Expression<Func<Categoria, bool>> filtro = c =>
                 string.IsNullOrEmpty(filters.TextFilter) ||
-                EF.Functions.Like(c.Nombre, $"%{filters.TextFilter}%");
+                c.Nombre.ToLower().Contains(filters.TextFilter.ToLower());
 
-            var response = await _unitOfWork.Categorias.ListAsync(
-                filters,
-                filtro,
-                include: q => q.Include(c => c.Productos)
-            );
+            // ACÁ la llamada correcta
+            var response = await _unitOfWork.Categorias.ListAsync(filters, filtro);
 
             // Mapear entidades a DTOs
             var dtoResponse = new BaseEntityResponse<CategoriaDTO>
@@ -80,6 +103,37 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
 
             return dtoResponse;
         }
+        */
+
+        // ----------------- Mostrar Categorías -----------------
+        public async Task<BaseEntityResponse<CategoriaDTO>> MostrarCategoriasAsync(BaseFilterRequest? filters = null)
+        {
+            filters ??= new BaseFilterRequest();
+
+            Expression<Func<Categoria, bool>> filtro = c =>
+                string.IsNullOrEmpty(filters.TextFilter) ||
+                c.Nombre.ToLower().Contains(filters.TextFilter.ToLower());
+
+            var categorias = await _unitOfWork.Categorias.ListAsync(filters, filtro);
+
+            return new BaseEntityResponse<CategoriaDTO>
+            {
+                TotalRecords = categorias.TotalRecords,
+                Records = categorias.Records.Select(c => new CategoriaDTO
+                {
+                    CatId = c.CatId,
+                    CategoriaId = c.CategoriaId,
+                    Nombre = c.Nombre,
+                    Descripcion = c.Descripcion,
+                    CantidadProductos = c.Productos?.Count ?? 0
+                }).ToList()
+            };
+        }
+
+
+
+
+
 
         // ----------------- Modificar Categoría -----------------
         public async Task ModificarCategoriaAsync(UpdateCategoriaDTO dto)
@@ -96,27 +150,28 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
                 throw new KeyNotFoundException("La categoría no existe");
 
             categoriaExistente.UpdateEntity(dto);
-            _unitOfWork.Categorias.Update(categoriaExistente);
+            await _unitOfWork.Categorias.UpdateAsync(categoriaExistente.CatId, categoriaExistente);
+
+
 
             await _unitOfWork.SaveChangesAsync();
         }
 
         // ----------------- Eliminar Categoría -----------------
-        public async Task EliminarCategoriaAsync(int idCategoria)
+        public async Task EliminarCategoriaAsync(string CatId)
         {
-            var categoria = await _unitOfWork.Categorias.GetByIdAsync(idCategoria);
+            var categoria = await _unitOfWork.Categorias.GetByIdAsync(CatId);
             if (categoria == null)
                 throw new KeyNotFoundException("La categoría no existe");
 
-            _unitOfWork.Categorias.Remove(categoria);
+            await _unitOfWork.Categorias.RemoveAsync(CatId);
             await _unitOfWork.SaveChangesAsync();
         }
 
         // ----------------- Obtener Categoría por Id -----------------
-        public async Task<CategoriaDTO> ObtenerPorIdCategoriaAsync(int idCategoria)
+        public async Task<CategoriaDTO> ObtenerPorIdCategoriaAsync(string CatId)
         {
-            var categoria = await _unitOfWork.Categorias
-                .GetByIdAsync(idCategoria, include: q => q.Include(c => c.Productos));
+            var categoria = await _unitOfWork.Categorias.GetByIdAsync(CatId);
 
             if (categoria == null)
                 throw new KeyNotFoundException("La categoría no existe");

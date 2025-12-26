@@ -1,4 +1,5 @@
 ﻿using EstructuraVentas.Dominio.Modelos;
+using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
 using EstructuraVentas.Infraestructura.Persistencia.Repositories;
 using EstructuraVentas.LogicaNegocio.Utilidades;
 using System;
@@ -11,12 +12,11 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
 {
     public class UsuarioServicio
     {
-        private readonly IUsuarioRepository _usuarioRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UsuarioServicio(IUsuarioRepository usuarioRepository)
+        public UsuarioServicio(IUnitOfWork unitOfWork)
         {
-            _usuarioRepository = usuarioRepository ?? throw new ArgumentNullException(nameof(_usuarioRepository));
-
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<bool> AutenticarUsuarioAsync(string nombreUsuario, string contraseña)
@@ -24,19 +24,13 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
             if (string.IsNullOrEmpty(nombreUsuario) || string.IsNullOrEmpty(contraseña))
                 return false;
 
-            var usuario = await _usuarioRepository.ObtenerPorNombreUsuarioAsync(nombreUsuario);
+            // 🔥 Buscar por nombre de usuario, NO por ID
+            var usuario = await _unitOfWork.Usuarios.ObtenerPorNombreUsuarioAsync(nombreUsuario);
 
             if (usuario == null)
                 return false;
 
-            try
-            {
-                return BCrypt.Net.BCrypt.Verify(contraseña, usuario.ContraseñaHasheada);
-            }
-            catch
-            {
-                return false;
-            }
+            return BCrypt.Net.BCrypt.Verify(contraseña, usuario.ContraseñaHasheada);
         }
 
         public async Task RegistrarUsuarioAsync(Usuario usuario)
@@ -44,63 +38,44 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
             if (usuario == null)
                 throw new ArgumentNullException(nameof(usuario));
 
-            // Verificar si el nombre de usuario ya existe
-            var usuarioExistente = await _usuarioRepository.ObtenerPorNombreUsuarioAsync(usuario.NombreUsuario);
+            // 🔥 Verificar si ya existe
+            var usuarioExistente = await _unitOfWork.Usuarios.ObtenerPorNombreUsuarioAsync(usuario.NombreUsuario);
+
             if (usuarioExistente != null)
                 throw new InvalidOperationException("El nombre de usuario ya está en uso.");
 
-            // Validar la contraseña
+            // 🔥 Validar contraseña
             var resultadoValidacion = await ValidarContraseñaAsync(usuario.Contraseña);
+
             if (!resultadoValidacion.EsValida)
             {
                 var errores = string.Join(" ", resultadoValidacion.Errores);
                 throw new ArgumentException("Error en la contraseña: " + errores);
             }
 
-            // Hashear la contraseña antes de guardarla
-            if (string.IsNullOrEmpty(usuario.ContraseñaHasheada))
-            {
-                usuario.ContraseñaHasheada = BCrypt.Net.BCrypt.HashPassword(usuario.Contraseña);
-                //usuario.Contraseña = null; // Limpiar la contraseña en texto plano
-            }
+            //Hashear antes de guardar
+            usuario.ContraseñaHasheada = BCrypt.Net.BCrypt.HashPassword(usuario.Contraseña);
+            usuario.Contraseña = null;
 
-            try
-            {
-                await _usuarioRepository.AgregarUsuarioAsync(usuario);
-                await _usuarioRepository.GuardarCambiosAsync();
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.Contains("unique constraint") || ex.Message.Contains("duplicate"))
-                    throw new InvalidOperationException("El nombre de usuario ya está en uso.", ex);
-                throw;
-            }
+            await _unitOfWork.Usuarios.AddAsync(usuario);
         }
 
-        public async Task AsignarRolAUsuarioAsync(int usuarioId, RolDelUsuario rol)
+        public async Task AsignarRolAUsuarioAsync(string usuarioId, RolDelUsuario rol)
         {
-            var usuario = await _usuarioRepository.ObtenerUsuarioPorIdAsync(usuarioId);
+            var usuario = await _unitOfWork.Usuarios.GetByIdAsync(usuarioId);
+
             if (usuario == null)
                 throw new InvalidOperationException("El usuario no existe.");
 
             usuario.RolDelUsuario = rol;
 
-            try
-            {
-                await _usuarioRepository.ActualizarUsuarioAsync(usuario);
-                await _usuarioRepository.GuardarCambiosAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Error al asignar el rol al usuario.", ex);
-            }
+            // 🔥 Actualiza por ID
+            await _unitOfWork.Usuarios.UpdateAsync(usuarioId, usuario);
         }
 
         public static Task<ResultadoValidacion> ValidarContraseñaAsync(string contraseña)
         {
             var resultado = new ResultadoValidacion();
-
-
 
             if (string.IsNullOrWhiteSpace(contraseña))
             {
@@ -119,7 +94,6 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
             }
 
             resultado.EsValida = resultado.Errores.Count == 0;
-
             return Task.FromResult(resultado);
         }
     }

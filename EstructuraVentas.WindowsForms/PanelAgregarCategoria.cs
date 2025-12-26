@@ -1,4 +1,5 @@
 ﻿using EstructuraVentas.Dominio.Modelos;
+using EstructuraVentas.LogicaNegocio.DTOs.Categoria;
 using EstructuraVentas.LogicaNegocio.Servicios;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -47,13 +48,14 @@ namespace EstructuraVentas.WindowsForms
             //Validar que todos los campos estén completos
             if (string.IsNullOrEmpty(nombreTexto) ||
                 string.IsNullOrEmpty(descripcion))
-             
+
             {
                 MessageBox.Show("Debes llenar todos los campos.");
                 return;
             }
 
-            var nuevaCategoria = new Categoria
+            //var nuevaCategoria = new Categoria
+            var nuevaCategoriaDTO = new CreateCategoriaDTO
             {
                 Nombre = nombreTexto,
                 Descripcion = descripcion
@@ -62,7 +64,10 @@ namespace EstructuraVentas.WindowsForms
             try
             {
                 var categoriaServicio = _serviceProvider.GetService<CategoriaServicio>();
-                await categoriaServicio.AgregarCategoriaAsync(nuevaCategoria);
+                //await categoriaServicio.AgregarCategoriaAsync(nuevaCategoria);
+                await categoriaServicio.AgregarCategoriaAsync(nuevaCategoriaDTO);
+
+
                 MessageBox.Show("¡Categoria registrada con éxito!");
                 LimpiarCampos();
                 this.Hide();
@@ -82,3 +87,4 @@ namespace EstructuraVentas.WindowsForms
         }
     }
 }
+

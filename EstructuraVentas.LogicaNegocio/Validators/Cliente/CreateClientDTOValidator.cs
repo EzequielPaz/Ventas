@@ -9,7 +9,8 @@ namespace EstructuraVentas.LogicaNegocio.Validators.Cliente
     {
         public CreateClientDTOValidator()
         {
-            RuleFor(c => c.NombreCliente).NotEmpty().MaximumLength(30);
+            RuleFor(c => c.NombreCliente).
+                NotEmpty().MaximumLength(50);
 
             RuleFor(c => c.Email).NotEmpty().EmailAddress().MaximumLength(50)
                .WithMessage("Debe digitar un correo con formato valido");

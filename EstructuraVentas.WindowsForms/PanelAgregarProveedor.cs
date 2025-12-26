@@ -2,22 +2,16 @@
 using EstructuraVentas.LogicaNegocio.DTOs.Proveedor;
 using EstructuraVentas.LogicaNegocio.Servicios;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace EstructuraVentas.WindowsForms
 {
     public partial class PanelAgregarProveedor : Form
     {
         private readonly IServiceProvider _serviceProvider;
+        public event EventHandler ProveedorAgregado;
+
 
         public PanelAgregarProveedor(IServiceProvider serviceProvider)
         {
@@ -60,7 +54,7 @@ namespace EstructuraVentas.WindowsForms
                 string.IsNullOrEmpty(cuitTexto) ||
                 string.IsNullOrEmpty(codigoTexto))
             {
-                MessageBox.Show("Debes llenar todos los campos.");
+                MessageBox.Show("Todos los campos son obligatorios.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -93,28 +87,54 @@ namespace EstructuraVentas.WindowsForms
 
 
         }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            this.Hide();
-        }
-
-        private void PanelAgregarProveedor_Load(object sender, EventArgs e)
-        {
-           
-        }
-
-        private void PanelAgregarProveedor_Load_1(object sender, EventArgs e)
-        {
-
-        }
-        private void LimpiarCampos()
+        private void LimpiarTextBox()
         {
             textBox1.Clear();
             textBox2.Clear();
             textBox3.Clear();
             textBox4.Clear();
             textBox5.Clear();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            LimpiarTextBox();
+            this.Hide();
+        }
+
+        private void PanelAgregarProveedor_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void PanelAgregarProveedor_Load_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox2_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox3_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox4_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox5_TextChanged_1(object sender, EventArgs e)
+        {
+
         }
 
 

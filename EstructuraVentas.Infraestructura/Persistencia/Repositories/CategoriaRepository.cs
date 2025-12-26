@@ -1,45 +1,56 @@
-﻿using EstructuraVentas.Dominio;
-using EstructuraVentas.Dominio.Modelos;
+﻿using EstructuraVentas.Dominio.Modelos;
 using EstructuraVentas.Infraestructura.Persistencia.Contexto;
-using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using MongoDB.Driver;
 using System.Threading.Tasks;
 
 namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
 {
     public class CategoriaRepository : GenericRepository<Categoria>
     {
+        private readonly IMongoCollection<Categoria> _collection;
 
-        public CategoriaRepository(ApplicationDbContext context) : base(context) { }
-
-
-        // Obtener Categoria por ID
-        public async Task<Categoria?> GetCategoriaById(int id)
+        public CategoriaRepository(MongoDbContext context)
+            : base(context.Database, "Categorias")
         {
-            return await GetCategoriaById(id);
+            _collection = context.Database.GetCollection<Categoria>("Categorias");
         }
 
-        // Registrar Categoria (sin SaveChanges, lo hace UnitOfWork)
-        public async Task RegisterCategoria(Categoria categoria)
+        // Buscar por CatId (ObjectId como string)
+        public async Task<Categoria?> GetCategoriaByCatIdAsync(string catId)
         {
-            await AddAsync(categoria);
+            var filter = Builders<Categoria>.Filter.Eq(c => c.CatId, catId);
+            return await _collection.Find(filter).FirstOrDefaultAsync();
         }
 
-        // Editar Categoria (sin SaveChanges, lo hace UnitOfWork)
-        public void EditCategoria(Categoria categoria)
+        // Buscar por CategoriaId (int)
+        public async Task<Categoria?> GetCategoriaByCategoriaIdAsync(int categoriaId)
         {
-            Update(categoria);
+            var filter = Builders<Categoria>.Filter.Eq(c => c.CategoriaId, categoriaId);
+            return await _collection.Find(filter).FirstOrDefaultAsync();
         }
 
-        // Eliminar Categoria (sin SaveChanges, lo hace UnitOfWork)
-        public void DeleteCategoria(Categoria categoria)
+        public async Task RegisterCategoriaAsync(Categoria categoria)
         {
-            Remove(categoria);
+            await _collection.InsertOneAsync(categoria);
         }
 
+        public async Task EditCategoriaAsync(Categoria categoria)
+        {
+            // Reemplaza el documento cuyo CatId coincide
+            var filter = Builders<Categoria>.Filter.Eq(c => c.CatId, categoria.CatId);
+            await _collection.ReplaceOneAsync(filter, categoria);
+        }
+
+        public async Task DeleteCategoriaByCatIdAsync(string catId)
+        {
+            var filter = Builders<Categoria>.Filter.Eq(c => c.CatId, catId);
+            await _collection.DeleteOneAsync(filter);
+        }
+
+        public async Task DeleteCategoriaByCategoriaIdAsync(int categoriaId)
+        {
+            var filter = Builders<Categoria>.Filter.Eq(c => c.CategoriaId, categoriaId);
+            await _collection.DeleteOneAsync(filter);
+        }
     }
 }

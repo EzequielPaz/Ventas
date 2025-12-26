@@ -1,4 +1,6 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using EstructuraVentas.Dominio.Commons.Enums;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace EstructuraVentas.Dominio.Modelos
 {

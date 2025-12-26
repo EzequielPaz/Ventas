@@ -20,6 +20,7 @@ namespace EstructuraVentas.LogicaNegocio.Mapper
             {
                 IdProveedor = nuevoId,
                 RazonSocial = dto.RazonSocial,
+                CodigoProveedor = dto.CodigoProveedor,
                 CUIT = dto.CUIT,
                 CodigoProveedor = dto.CodigoProveedor,
                 Telefono = dto.Telefono,
@@ -41,6 +42,7 @@ namespace EstructuraVentas.LogicaNegocio.Mapper
                 FechaDeRegistro = proveedor.FechaDeRegistro.ToString("dd/MM/yyyy")
 
             };
+
         }
 
         public static void UpdateEntity(this Proveedor proveedor, UpdateProveedorDto dto)

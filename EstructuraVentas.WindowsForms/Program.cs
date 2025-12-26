@@ -1,13 +1,11 @@
-using EstructuraVentas.Dominio.Modelos;
+﻿using EstructuraVentas.Infraestructura.Contexto;
 using EstructuraVentas.Infraestructura.Persistencia.Contexto;
 using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
 using EstructuraVentas.Infraestructura.Persistencia.Repositories;
 using EstructuraVentas.Infraestructura.Persistencia.Utils;
 using EstructuraVentas.LogicaNegocio.Servicios;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using System.Configuration;
 
@@ -15,61 +13,91 @@ namespace EstructuraVentas.WindowsForms
 {
     internal static class Program
     {
-       
+
         [STAThread]
         static void Main()
         {
-            
             ApplicationConfiguration.Initialize();
 
+            // 1. Cargar la configuración de appsettings.json
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-
-            // Configuramos el contenedor de servicios
+            // 2. Configuramos el contenedor de servicios
             var services = new ServiceCollection();
             ConfigureServices(services, configuration);
 
-            // Construimos el ServiceProvider
+            // 3. Construimos el ServiceProvider y ejecutamos la primera forma
             var serviceProvider = services.BuildServiceProvider();
             Application.Run(serviceProvider.GetRequiredService<PanelLogin>());
         }
+
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            //// ========== SQL SERVER ==========
-            //var connectionString = configuration.GetConnectionString("DefaultConnection");
+            // 1. Registrar IConfiguration
+            services.AddSingleton<IConfiguration>(configuration);
 
-            //services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(connectionString));
+            // -----------------------------------------------------------------
+            // 2. CONFIGURACIÓN DE MONGODB (IMongoClient e IMongoDatabase)
+            // -----------------------------------------------------------------
 
-            //services.AddScoped<IUnitOfWork, UnitOfWork>();
-            //services.AddScoped<IClienteRepository, ClienteRepository>();
-            //services.AddScoped<IProductRepository, ProductoRepository>();
-            //services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-            //services.AddScoped<CategoriaRepository>();
+            var connectionString = configuration.GetConnectionString("MongoDb");
 
-            //services.AddScoped<ClienteServicios>();
-            //services.AddScoped<ProductoServicios>();
-            //services.AddScoped<UsuarioServicio>();
-            //services.AddScoped<CategoriaServicio>();
-            //services.AddScoped<VentaServicio>();
+            // a) Registrar IMongoClient (Singleton)
+            services.AddSingleton<IMongoClient>(s =>
+            {
+                // Manejar posible valor nulo de GetConnectionString
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    throw new InvalidOperationException("La cadena de conexión 'MongoDb' no está configurada en appsettings.json.");
+                }
+                return new MongoClient(connectionString);
+            });
 
+            // b) Registrar IMongoDatabase (Singleton)
+            services.AddSingleton<IMongoDatabase>(s =>
+            {
+                var client = s.GetRequiredService<IMongoClient>();
 
-            // ========== MONGO DB ==========
-            services.Configure<MongoDbSettings>(configuration.GetSection("MongoDbSettings"));
+                // Obtener el nombre de la base de datos de la configuración
+                var databaseName = configuration.GetValue<string>("MongoDbDatabaseName");
 
-            services.AddSingleton<MongoContext>();
+                if (string.IsNullOrEmpty(databaseName))
+                {
+                    throw new InvalidOperationException("Falta la clave 'MongoDbDatabaseName' en appsettings.json.");
+                }
 
-            services.AddScoped<IUnitOfWorkMongo, MongoUnitOfWork>();
+                // 🌟 CORRECCIÓN AQUÍ 🌟
+                return client.GetDatabase(databaseName);
+            }); // 👈 Cierre del AddSingleton de IMongoDatabase
+
+            // -----------------------------------------------------------------
+            // 3. Repositorios y Unit Of Work
+            // -----------------------------------------------------------------
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // Repositorios específicos
+            services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             services.AddScoped<IProveedorRepository, ProveedorRepository>();
-            services.AddScoped(typeof(IGenericRepositoryMongo<>), typeof(MongoGenericRepository<>));
+            services.AddScoped<CategoriaRepository>();
+            // services.AddScoped<IProductRepository, ProductoRepository>();
+            // services.AddScoped<IVentasRespository, VentaRepository>();
+
+            // 4. Servicios de Lógica de Negocio
+            services.AddScoped<ClienteServicios>();
+            services.AddScoped<ProductoServicios>();
+            services.AddScoped<UsuarioServicio>();
             services.AddScoped<ProveedorServicio>();
+            services.AddScoped<CategoriaServicio>();
+            services.AddScoped<VentaServicio>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<ProductoServicios>();
 
 
-            // ========== FORMULARIOS ==========
-            services.AddScoped<PanelLogin>();
+            // 5. Formas (Paneles/Vistas)
             services.AddScoped<PanelClientes>();
             services.AddScoped<PanelProductos>();
             services.AddScoped<PanelDashboard>();
@@ -85,8 +113,7 @@ namespace EstructuraVentas.WindowsForms
             services.AddScoped<PanelCompras>();
             services.AddScoped<PanelAgregarCategoria>();
             services.AddScoped<PanelAgregarVentas>();
-
-
+            
         }
     }
 }

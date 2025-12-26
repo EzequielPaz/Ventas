@@ -1,4 +1,4 @@
-﻿using EstructuraVentas.LogicaNegocio.DTOs.Clientes;
+﻿using EstructuraVentas.LogicaNegocio.DTOs.Proveedor;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
@@ -7,25 +7,25 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace EstructuraVentas.LogicaNegocio.Validators.Cliente
+namespace EstructuraVentas.LogicaNegocio.Validators.Proveedor
 {
-    public class UpdateClienteDTOValidator : AbstractValidator<UpdateClienteDTO>
+    public class UpdateProveedorDtoValidator :AbstractValidator<UpdateProveedorDTO>
     {
-        public UpdateClienteDTOValidator()
+        public UpdateProveedorDtoValidator()
         {
             //RuleFor(c => c.IDClientes)
             //   .GreaterThan(0).WithMessage("El Id debe ser válido");
 
-            RuleFor(c => c.NombreCliente)
-                .NotEmpty().WithMessage("El nombre es obligatorio")
-                .Length(3, 50).WithMessage("El nombre debe tener entre 3 y 50 caracteres.");
+            RuleFor(c => c.RazonSocial)
+                .NotEmpty().WithMessage("La Razon social es un campo obligatorio")
+                .Length(3, 50).WithMessage("Debe tener entre 3 y 50 caracteres.");
 
-            RuleFor(c => c.Email)
+            RuleFor(c => c.CodigoProveedor)
                 .EmailAddress().WithMessage("Debe digitar un correo con formato válido")
                 .MaximumLength(50).WithMessage("El correo no puede superar los 50 caracteres.")
-                .When(x => !string.IsNullOrEmpty(x.Email));
+                .When(x => !string.IsNullOrEmpty(x.CodigoProveedor));
 
-            RuleFor(p => p.Documento)
+            RuleFor(p => p.CUIT)
                 .NotEmpty().WithMessage("El documento es obligatorio")
                 .Must(c =>
                 {
@@ -42,12 +42,10 @@ namespace EstructuraVentas.LogicaNegocio.Validators.Cliente
                 })
                 .WithMessage("El documento debe tener hasta 11 dígitos o el formato con guiones: XX-XXXXXXXX-X. No se permiten letras ni espacios.");
 
-            RuleFor(p => p.Celular)
+            RuleFor(p => p.Telefono)
                 .Matches(@"^\d{1,30}$")
                 .WithMessage("El Teléfono debe contener solo números positivos y como máximo 30 dígitos.")
-                .When(p => !string.IsNullOrEmpty(p.Celular));
-
-
+                .When(p => !string.IsNullOrEmpty(p.Telefono));
         }
     }
 }

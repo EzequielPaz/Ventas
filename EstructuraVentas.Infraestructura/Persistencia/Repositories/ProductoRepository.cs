@@ -1,63 +1,99 @@
 ﻿using EstructuraVentas.Dominio;
 using EstructuraVentas.Dominio.Commons.Enums;
+
 using EstructuraVentas.Infraestructura.Commons.Bases.Request;
 using EstructuraVentas.Infraestructura.Commons.Bases.Response;
-using EstructuraVentas.Infraestructura.Persistencia.Contexto;
 using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using System.Linq.Expressions;
 
 namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
 {
-    public class ProductoRepository : GenericRepository<Producto>, IProductRepository
+    public class ProductoRepository
+        : GenericRepository<Producto>, IProductRepository
     {
-        public ProductoRepository(ApplicationDbContext context) : base(context)
+        private readonly IMongoCollection<Producto> _collection;
+
+        public ProductoRepository(IMongoDatabase database)
+            : base(database, "Productos")
         {
+            _collection = database.GetCollection<Producto>("Productos");
         }
 
-        // Listado con filtros y paginación
+        // ============================================
+        // LISTADO CON FILTROS + PAGINACIÓN (MongoDB)
+        // ============================================
         public async Task<BaseEntityResponse<Producto>> ListProductos(BaseFilterRequest filters)
         {
-            string texto = filters.TextFilter?.Trim();
-            Estado? estado = filters.StateFilter.HasValue
-                             ? (Estado?)filters.StateFilter.Value
-                             : null;
+            var builder = Builders<Producto>.Filter;
+            var filter = builder.Empty;
 
-            Expression<Func<Producto, bool>> filtro = p =>
-                (string.IsNullOrEmpty(texto) ||
-                    EF.Functions.Like(p.Nombre, $"%{texto}%") ||
-                    (p.Descripcion != null && EF.Functions.Like(p.Descripcion, $"%{texto}%")) ||
-                    (p.Marca != null && EF.Functions.Like(p.Marca, $"%{texto}%")) ||
-                    (p.Codigo != null && EF.Functions.Like(p.Codigo, $"%{texto}%"))
-                ) &&
-                (!estado.HasValue || p.Estado == estado.Value);
+            // Texto a buscar
+            if (!string.IsNullOrEmpty(filters.TextFilter))
+            {
+                var texto = filters.TextFilter.Trim();
 
-            return await ListAsync(filters, filtro);
+                filter &= builder.Or(
+                    builder.Regex(p => p.Nombre, new MongoDB.Bson.BsonRegularExpression(texto, "i")),
+                    builder.Regex(p => p.Descripcion, new MongoDB.Bson.BsonRegularExpression(texto, "i")),
+                    builder.Regex(p => p.Marca, new MongoDB.Bson.BsonRegularExpression(texto, "i")),
+                    builder.Regex(p => p.Codigo, new MongoDB.Bson.BsonRegularExpression(texto, "i"))
+                );
+            }
+
+            // Filtro por Estado
+            if (filters.StateFilter.HasValue)
+            {
+                Estado estado = (Estado)filters.StateFilter.Value;
+                filter &= builder.Eq(p => p.Estado, estado);
+            }
+
+            long totalRecords = await _collection.CountDocumentsAsync(filter);
+
+            var result = await _collection.Find(filter)
+                .Skip((filters.PageIndex - 1) * filters.PageSize)
+                .Limit(filters.PageSize)
+                .ToListAsync();
+
+            return new BaseEntityResponse<Producto>
+            {
+                TotalRecords = (int)totalRecords,
+                Records = result
+            };
         }
 
-        // Obtener cliente por ID
-        public async Task<Producto?> GetProductById(int id)
+        // ============================================
+        // OBTENER PRODUCTO POR ID
+        // ============================================
+        public async Task<Producto?> GetProductById(string id)
         {
-            return await GetByIdAsync(id);
+            return await _collection.Find(p => p.IdProducto == id).FirstOrDefaultAsync();
         }
 
-        // Registrar producto (sin SaveChanges, lo hace UnitOfWork)
+        // ============================================
+        // REGISTRAR PRODUCTO
+        // ============================================
         public async Task RegisterProduct(Producto producto)
         {
-            await AddAsync(producto);
+            await _collection.InsertOneAsync(producto);
         }
 
-        // Editar Producto (sin SaveChanges, lo hace UnitOfWork)
-        public void EditProduct(Producto product)
+        // ============================================
+        // EDITAR PRODUCTO
+        // ============================================
+        public async Task EditProduct(Producto producto)
         {
-            Update(product);
+            await _collection.ReplaceOneAsync(
+                p => p.IdProducto == producto.IdProducto,
+                producto);
         }
 
-        // Eliminar producto (sin SaveChanges, lo hace UnitOfWork)
-        public void DeleteProduct(Producto product)
+        // ============================================
+        // ELIMINAR PRODUCTO
+        // ============================================
+        public async Task DeleteProduct(Producto producto)
         {
-            Remove(product);
+            await _collection.DeleteOneAsync(p => p.IdProducto == producto.IdProducto);
         }
-
     }
 }

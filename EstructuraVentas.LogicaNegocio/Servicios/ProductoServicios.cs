@@ -1,13 +1,11 @@
 ﻿using EstructuraVentas.Dominio;
 using EstructuraVentas.Dominio.Commons.Enums;
-
 using EstructuraVentas.Infraestructura.Commons.Bases.Request;
 using EstructuraVentas.Infraestructura.Commons.Bases.Response;
 using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
 using EstructuraVentas.LogicaNegocio.DTOs.Categoria;
 using EstructuraVentas.LogicaNegocio.DTOs.Producto;
 using EstructuraVentas.LogicaNegocio.Mapper;
-using EstructuraVentas.LogicaNegocio.Validators;
 using EstructuraVentas.LogicaNegocio.Validators.Producto;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -26,12 +24,12 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
             _unitOfWork = unitOfWork;
             _validatorCreate = new CreateProductDtoValidator();
             _validatorUpdate = new UpdateProducDtoValidator();
-
         }
 
-        //Agregar Producto
-
-        public async Task<ProductResponseDto> AgregarProducto(CreateProductDTO dto) 
+        // ================================
+        // AGREGAR PRODUCTO
+        // ================================
+        public async Task<ProductResponseDto> AgregarProducto(CreateProductDTO dto)
         {
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
@@ -48,20 +46,22 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
             return producto.ToResponse();
         }
 
-
-        
-        public async Task EliminarProducto(int idProducto)
+        // ================================
+        // ELIMINAR PRODUCTO
+        // ================================
+        public async Task EliminarProducto(string idProducto)
         {
             var producto = await _unitOfWork.Productos.GetByIdAsync(idProducto);
             if (producto == null)
-                throw new KeyNotFoundException("El producto no existe");
+                throw new KeyNotFoundException("El producto no existe.");
 
-            _unitOfWork.Productos.Remove(producto);
-            await _unitOfWork.SaveChangesAsync(); // ✅ Esperamos que termine antes de otra operación
-
+            await _unitOfWork.Productos.RemoveAsync(producto.IdProducto);
+            await _unitOfWork.SaveChangesAsync();
         }
 
-        //Modificar Producto
+        // ================================
+        // MODIFICAR PRODUCTO
+        // ================================
         public async Task ModificarProducto(UpdateProductDTO dto)
         {
             if (dto == null)
@@ -73,15 +73,17 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
 
             var productoExistente = await _unitOfWork.Productos.GetByIdAsync(dto.IdProducto);
             if (productoExistente == null)
-                throw new KeyNotFoundException("El producto no existe");
+                throw new KeyNotFoundException("El producto no existe.");
 
             productoExistente.UpdateEntity(dto);
-
-            _unitOfWork.Productos.Update(productoExistente);
-            await _unitOfWork.SaveChangesAsync(); // ✅ Esperamos que termine antes de otra operación
+            await _unitOfWork.Productos.UpdateAsync(productoExistente.IdProducto, productoExistente);
+            //_unitOfWork.Productos.UpdateAsync(productoExistente);
+            await _unitOfWork.SaveChangesAsync();
         }
 
-        //Mostrar Producto en grilla
+        // ================================
+        // MOSTRAR PRODUCTOS (CON FILTROS)
+        // ================================
         public async Task<BaseEntityResponse<Producto>> MostrarProductos(ProductoFilterRequest? filters = null)
         {
             filters ??= new ProductoFilterRequest();
@@ -98,44 +100,55 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
                  EF.Functions.Like(p.Codigo ?? string.Empty, $"%{filters.Codigo}%")) &&
                 (!estadoFilter.HasValue || p.Estado == estadoFilter.Value);
 
-            // 🔹 Incluir categoría para mostrar su nombre en la grilla
             var response = await _unitOfWork.Productos.ListAsync(
                 filters,
-                filtroExtra,
-                include: q => q.Include(p => p.Categoria)
-            );
+                filtroExtra
+             );
+
+            // ============================================
+            // AGREGAR ESTO PARA CARGAR LA CATEGORÍA
+            // ============================================
+            var todasLasCategorias = await _unitOfWork.Categorias.GetAllAsync();
+
+            foreach (var producto in response.Records)
+            {
+                producto.Categoria = todasLasCategorias
+                    .FirstOrDefault(c => c.CategoriaId == producto.CategoriaId);
+            }
+            // ========================================
+            // ============================================
 
             return response;
-
         }
 
-        // ----------------- Obtener Cliente por Id -----------------
-        public async Task<ProductResponseDto> ObtenerPorIdProductoeAsync(int idProducto)
+        // ================================
+        // OBTENER POR ID
+        // ================================
+        public async Task<ProductResponseDto> ObtenerPorIdProductoAsync(string idProducto)
         {
-            var producto = await _unitOfWork.Productos.GetByIdAsync(
-        idProducto,
-        include: q => q.Include(p => p.Categoria)
-    );
+            var producto = await _unitOfWork.Productos.GetByIdAsync(idProducto.ToString());
+
 
             if (producto == null)
-                throw new KeyNotFoundException("El producto no existe");
+                throw new KeyNotFoundException("El producto no existe.");
 
             return producto.ToResponse();
-
-
         }
 
+        // ================================
+        // OBTENER CATEGORÍAS
+        // ================================
         public async Task<IEnumerable<CategoriaDTO>> ObtenerCategoriasAsync()
         {
-            var categorias = await _unitOfWork.Categorias.GetAllAsync();
+            var categorias = await _unitOfWork.Categorias.GetAllAsync(); // List<Categoria>
+
             return categorias.Select(c => new CategoriaDTO
             {
-                IdCategoria = c.IdCategoria,
+                CatId = c.CatId,          // string ObjectId
+                CategoriaId = c.CategoriaId,  // int 
                 Nombre = c.Nombre
-            });
+            }).ToList(); // <-- aquí es ToList() normal
         }
-
-
 
     }
 }

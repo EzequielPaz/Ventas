@@ -29,7 +29,8 @@ namespace EstructuraVentas.LogicaNegocio.Mapper
         {
             return new CategoriaDTO
             {
-                IdCategoria = categoria.IdCategoria,
+                CatId = categoria.CatId,
+                CategoriaId = categoria.CategoriaId,
                 Nombre = categoria.Nombre,
                 Descripcion = categoria.Descripcion,
                 CantidadProductos = categoria.Productos?.Count ?? 0

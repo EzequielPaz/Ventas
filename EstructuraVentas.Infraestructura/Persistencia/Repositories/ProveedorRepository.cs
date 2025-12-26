@@ -16,8 +16,6 @@ using System.Threading.Tasks;
 
 namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
 {
-    //Esta clase implementa la interfaz IProveedorRepository para manejar operaciones CRUD sobre la entidad Proveedor
-    //dentro de una base de datos usando Entity Framework 
 
 
     public class ProveedorRepository : MongoGenericRepository<Proveedor>, IProveedorRepository

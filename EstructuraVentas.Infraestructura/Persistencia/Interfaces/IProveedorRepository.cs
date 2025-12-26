@@ -1,4 +1,7 @@
-﻿using EstructuraVentas.Dominio.Modelos;
+﻿using EstructuraVentas.Dominio;
+using EstructuraVentas.Dominio.Modelos;
+using EstructuraVentas.Infraestructura.Commons.Bases.Request;
+using EstructuraVentas.Infraestructura.Commons.Bases.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
