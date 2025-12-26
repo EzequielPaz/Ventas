@@ -1,13 +1,11 @@
 ﻿using EstructuraVentas.Dominio;
 using EstructuraVentas.Dominio.Commons.Enums;
-
 using EstructuraVentas.Infraestructura.Commons.Bases.Request;
 using EstructuraVentas.Infraestructura.Commons.Bases.Response;
 using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
 using EstructuraVentas.LogicaNegocio.DTOs.Categoria;
 using EstructuraVentas.LogicaNegocio.DTOs.Producto;
 using EstructuraVentas.LogicaNegocio.Mapper;
-using EstructuraVentas.LogicaNegocio.Validators;
 using EstructuraVentas.LogicaNegocio.Validators.Producto;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -17,125 +15,140 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
 {
     public class ProductoServicios
     {
-    //    private readonly IUnitOfWork _unitOfWork;
-    //    private readonly CreateProductDtoValidator _validatorCreate;
-    //    private readonly UpdateProducDtoValidator _validatorUpdate;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly CreateProductDtoValidator _validatorCreate;
+        private readonly UpdateProducDtoValidator _validatorUpdate;
 
-    //    public ProductoServicios(IUnitOfWork unitOfWork)
-    //    {
-    //        _unitOfWork = unitOfWork;
-    //        _validatorCreate = new CreateProductDtoValidator();
-    //        _validatorUpdate = new UpdateProducDtoValidator();
+        public ProductoServicios(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+            _validatorCreate = new CreateProductDtoValidator();
+            _validatorUpdate = new UpdateProducDtoValidator();
+        }
 
-    //    }
+        // ================================
+        // AGREGAR PRODUCTO
+        // ================================
+        public async Task<ProductResponseDto> AgregarProducto(CreateProductDTO dto)
+        {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
 
-    //    //Agregar Producto
+            var resultado = _validatorCreate.Validate(dto);
+            if (!resultado.IsValid)
+                throw new ValidationException(resultado.Errors);
 
-    //    public async Task<ProductResponseDto> AgregarProducto(CreateProductDTO dto) 
-    //    {
-    //        if (dto == null)
-    //            throw new ArgumentNullException(nameof(dto));
+            var producto = dto.ToEntity();
 
-    //        var resultado = _validatorCreate.Validate(dto);
-    //        if (!resultado.IsValid)
-    //            throw new ValidationException(resultado.Errors);
+            await _unitOfWork.Productos.AddAsync(producto);
+            await _unitOfWork.SaveChangesAsync();
 
-    //        var producto = dto.ToEntity();
+            return producto.ToResponse();
+        }
 
-    //        await _unitOfWork.Productos.AddAsync(producto);
-    //        await _unitOfWork.SaveChangesAsync();
+        // ================================
+        // ELIMINAR PRODUCTO
+        // ================================
+        public async Task EliminarProducto(string idProducto)
+        {
+            var producto = await _unitOfWork.Productos.GetByIdAsync(idProducto);
+            if (producto == null)
+                throw new KeyNotFoundException("El producto no existe.");
 
-    //        return producto.ToResponse();
-    //    }
+            await _unitOfWork.Productos.RemoveAsync(producto.IdProducto);
+            await _unitOfWork.SaveChangesAsync();
+        }
 
+        // ================================
+        // MODIFICAR PRODUCTO
+        // ================================
+        public async Task ModificarProducto(UpdateProductDTO dto)
+        {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
 
-        
-    //    public async Task EliminarProducto(int idProducto)
-    //    {
-    //        var producto = await _unitOfWork.Productos.GetByIdAsync(idProducto);
-    //        if (producto == null)
-    //            throw new KeyNotFoundException("El producto no existe");
+            var resultadoValidacion = _validatorUpdate.Validate(dto);
+            if (!resultadoValidacion.IsValid)
+                throw new ValidationException(resultadoValidacion.Errors);
 
-    //        _unitOfWork.Productos.Remove(producto);
-    //        await _unitOfWork.SaveChangesAsync(); // ✅ Esperamos que termine antes de otra operación
+            var productoExistente = await _unitOfWork.Productos.GetByIdAsync(dto.IdProducto);
+            if (productoExistente == null)
+                throw new KeyNotFoundException("El producto no existe.");
 
-    //    }
+            productoExistente.UpdateEntity(dto);
+            await _unitOfWork.Productos.UpdateAsync(productoExistente.IdProducto, productoExistente);
+            //_unitOfWork.Productos.UpdateAsync(productoExistente);
+            await _unitOfWork.SaveChangesAsync();
+        }
 
-    //    //Modificar Producto
-    //    public async Task ModificarProducto(UpdateProductDTO dto)
-    //    {
-    //        if (dto == null)
-    //            throw new ArgumentNullException(nameof(dto));
+        // ================================
+        // MOSTRAR PRODUCTOS (CON FILTROS)
+        // ================================
+        public async Task<BaseEntityResponse<Producto>> MostrarProductos(ProductoFilterRequest? filters = null)
+        {
+            filters ??= new ProductoFilterRequest();
 
-    //        var resultadoValidacion = _validatorUpdate.Validate(dto);
-    //        if (!resultadoValidacion.IsValid)
-    //            throw new ValidationException(resultadoValidacion.Errors);
+            Estado? estadoFilter = filters.StateFilter.HasValue &&
+                                   Enum.IsDefined(typeof(Estado), filters.StateFilter.Value)
+                ? (Estado)filters.StateFilter.Value
+                : null;
 
-    //        var productoExistente = await _unitOfWork.Productos.GetByIdAsync(dto.IdProducto);
-    //        if (productoExistente == null)
-    //            throw new KeyNotFoundException("El producto no existe");
+            Expression<Func<Producto, bool>> filtroExtra = p =>
+                (string.IsNullOrEmpty(filters.TextFilter) ||
+                 EF.Functions.Like(p.Nombre ?? string.Empty, $"%{filters.TextFilter}%")) &&
+                (string.IsNullOrEmpty(filters.Codigo) ||
+                 EF.Functions.Like(p.Codigo ?? string.Empty, $"%{filters.Codigo}%")) &&
+                (!estadoFilter.HasValue || p.Estado == estadoFilter.Value);
 
-    //        productoExistente.UpdateEntity(dto);
+            var response = await _unitOfWork.Productos.ListAsync(
+                filters,
+                filtroExtra
+             );
 
-    //        _unitOfWork.Productos.Update(productoExistente);
-    //        await _unitOfWork.SaveChangesAsync(); // ✅ Esperamos que termine antes de otra operación
-    //    }
+            // ============================================
+            // AGREGAR ESTO PARA CARGAR LA CATEGORÍA
+            // ============================================
+            var todasLasCategorias = await _unitOfWork.Categorias.GetAllAsync();
 
-    //    //Mostrar Producto en grilla
-    //    public async Task<BaseEntityResponse<Producto>> MostrarProductos(ProductoFilterRequest? filters = null)
-    //    {
-    //        filters ??= new ProductoFilterRequest();
+            foreach (var producto in response.Records)
+            {
+                producto.Categoria = todasLasCategorias
+                    .FirstOrDefault(c => c.CategoriaId == producto.CategoriaId);
+            }
+            // ========================================
+            // ============================================
 
-    //        Estado? estadoFilter = filters.StateFilter.HasValue &&
-    //                               Enum.IsDefined(typeof(Estado), filters.StateFilter.Value)
-    //            ? (Estado)filters.StateFilter.Value
-    //            : null;
+            return response;
+        }
 
-    //        Expression<Func<Producto, bool>> filtroExtra = p =>
-    //            (string.IsNullOrEmpty(filters.TextFilter) ||
-    //             EF.Functions.Like(p.Nombre ?? string.Empty, $"%{filters.TextFilter}%")) &&
-    //            (string.IsNullOrEmpty(filters.Codigo) ||
-    //             EF.Functions.Like(p.Codigo ?? string.Empty, $"%{filters.Codigo}%")) &&
-    //            (!estadoFilter.HasValue || p.Estado == estadoFilter.Value);
-
-    //        // 🔹 Incluir categoría para mostrar su nombre en la grilla
-    //        var response = await _unitOfWork.Productos.ListAsync(
-    //            filters,
-    //            filtroExtra,
-    //            include: q => q.Include(p => p.Categoria)
-    //        );
-
-    //        return response;
-
-    //    }
-
-    //    // ----------------- Obtener Cliente por Id -----------------
-    //    public async Task<ProductResponseDto> ObtenerPorIdProductoeAsync(int idProducto)
-    //    {
-    //        var producto = await _unitOfWork.Productos.GetByIdAsync(
-    //    idProducto,
-    //    include: q => q.Include(p => p.Categoria)
-    //);
-
-    //        if (producto == null)
-    //            throw new KeyNotFoundException("El producto no existe");
-
-    //        return producto.ToResponse();
-
-
-    //    }
-
-    //    public async Task<IEnumerable<CategoriaDTO>> ObtenerCategoriasAsync()
-    //    {
-    //        var categorias = await _unitOfWork.Categorias.GetAllAsync();
-    //        return categorias.Select(c => new CategoriaDTO
-    //        {
-    //            IdCategoria = c.IdCategoria,
-    //            Nombre = c.Nombre
-    //        });
-    //    }
+        // ================================
+        // OBTENER POR ID
+        // ================================
+        public async Task<ProductResponseDto> ObtenerPorIdProductoAsync(string idProducto)
+        {
+            var producto = await _unitOfWork.Productos.GetByIdAsync(idProducto.ToString());
 
 
+            if (producto == null)
+                throw new KeyNotFoundException("El producto no existe.");
+
+            return producto.ToResponse();
+        }
+
+        // ================================
+        // OBTENER CATEGORÍAS
+        // ================================
+        public async Task<IEnumerable<CategoriaDTO>> ObtenerCategoriasAsync()
+        {
+            var categorias = await _unitOfWork.Categorias.GetAllAsync(); // List<Categoria>
+
+            return categorias.Select(c => new CategoriaDTO
+            {
+                CatId = c.CatId,          // string ObjectId
+                CategoriaId = c.CategoriaId,  // int 
+                Nombre = c.Nombre
+            }).ToList(); // <-- aquí es ToList() normal
+        }
 
     }
 }

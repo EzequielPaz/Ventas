@@ -13,7 +13,8 @@ namespace EstructuraVentas.LogicaNegocio.Validators.Categoria
         public UpdateCategoriaDTOValidator()
         {
             RuleFor(x => x.IdCategoria)
-                .GreaterThan(0).WithMessage("El Id de la categoría debe ser válido.");
+                .NotEmpty().WithMessage("El Id de la categoría es obligatorio.")
+                .Length(24).WithMessage("El Id de la categoría debe tener 24 caracteres (ObjectId de Mongo).");
 
             RuleFor(x => x.Nombre)
                 .NotEmpty().WithMessage("El nombre de la categoría es obligatorio.")

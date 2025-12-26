@@ -46,9 +46,9 @@
             // label1
             // 
             label1.Font = new Font("Segoe UI", 24F, FontStyle.Regular, GraphicsUnit.Point);
-            label1.Location = new Point(127, 49);
+            label1.Location = new Point(145, 65);
             label1.Name = "label1";
-            label1.Size = new Size(208, 44);
+            label1.Size = new Size(238, 59);
             label1.TabIndex = 0;
             label1.Text = "Proveedores";
             label1.Click += label1_Click;
@@ -56,10 +56,12 @@
             // dataGridView1
             // 
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(127, 168);
+            dataGridView1.Location = new Point(145, 224);
+            dataGridView1.Margin = new Padding(3, 4, 3, 4);
             dataGridView1.Name = "dataGridView1";
+            dataGridView1.RowHeadersWidth = 51;
             dataGridView1.RowTemplate.Height = 25;
-            dataGridView1.Size = new Size(899, 390);
+            dataGridView1.Size = new Size(874, 280);
             dataGridView1.TabIndex = 1;
             dataGridView1.CellContentClick += dataGridView1_CellContentClick;
             // 
@@ -70,9 +72,10 @@
             iconButton1.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconButton1.IconSize = 25;
             iconButton1.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton1.Location = new Point(713, 564);
+            iconButton1.Location = new Point(630, 522);
+            iconButton1.Margin = new Padding(3, 4, 3, 4);
             iconButton1.Name = "iconButton1";
-            iconButton1.Size = new Size(97, 32);
+            iconButton1.Size = new Size(111, 43);
             iconButton1.TabIndex = 3;
             iconButton1.Text = "Agregar";
             iconButton1.UseVisualStyleBackColor = true;
@@ -85,9 +88,10 @@
             iconButton2.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconButton2.IconSize = 18;
             iconButton2.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton2.Location = new Point(274, 107);
+            iconButton2.Location = new Point(313, 143);
+            iconButton2.Margin = new Padding(3, 4, 3, 4);
             iconButton2.Name = "iconButton2";
-            iconButton2.Size = new Size(33, 23);
+            iconButton2.Size = new Size(38, 31);
             iconButton2.TabIndex = 4;
             iconButton2.UseVisualStyleBackColor = true;
             iconButton2.Click += iconButton2_Click;
@@ -99,9 +103,10 @@
             iconButton3.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconButton3.IconSize = 25;
             iconButton3.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton3.Location = new Point(816, 564);
+            iconButton3.Location = new Point(781, 522);
+            iconButton3.Margin = new Padding(3, 4, 3, 4);
             iconButton3.Name = "iconButton3";
-            iconButton3.Size = new Size(97, 32);
+            iconButton3.Size = new Size(111, 43);
             iconButton3.TabIndex = 5;
             iconButton3.Text = "Editar";
             iconButton3.UseVisualStyleBackColor = true;
@@ -114,9 +119,10 @@
             iconButton4.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconButton4.IconSize = 25;
             iconButton4.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton4.Location = new Point(127, 564);
+            iconButton4.Location = new Point(145, 522);
+            iconButton4.Margin = new Padding(3, 4, 3, 4);
             iconButton4.Name = "iconButton4";
-            iconButton4.Size = new Size(104, 32);
+            iconButton4.Size = new Size(119, 43);
             iconButton4.TabIndex = 6;
             iconButton4.Text = "Actualizar";
             iconButton4.UseVisualStyleBackColor = true;
@@ -129,9 +135,10 @@
             iconButton5.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconButton5.IconSize = 25;
             iconButton5.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton5.Location = new Point(919, 564);
+            iconButton5.Location = new Point(911, 522);
+            iconButton5.Margin = new Padding(3, 4, 3, 4);
             iconButton5.Name = "iconButton5";
-            iconButton5.Size = new Size(107, 32);
+            iconButton5.Size = new Size(122, 43);
             iconButton5.TabIndex = 7;
             iconButton5.Text = "Eliminar";
             iconButton5.UseVisualStyleBackColor = true;
@@ -141,17 +148,18 @@
             // 
             comboBox1.FormattingEnabled = true;
             comboBox1.Items.AddRange(new object[] { "Razon Social", "CUIT", "Codigo Proveedor", "Correo" });
-            comboBox1.Location = new Point(127, 136);
+            comboBox1.Location = new Point(145, 181);
+            comboBox1.Margin = new Padding(3, 4, 3, 4);
             comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(121, 23);
+            comboBox1.Size = new Size(138, 28);
             comboBox1.TabIndex = 8;
             comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
             // 
             // label2
             // 
-            label2.Location = new Point(130, 111);
+            label2.Location = new Point(149, 148);
             label2.Name = "label2";
-            label2.Size = new Size(118, 23);
+            label2.Size = new Size(135, 31);
             label2.TabIndex = 9;
             label2.Text = "Columna";
             // 
@@ -161,9 +169,10 @@
             iconButton6.IconColor = Color.Black;
             iconButton6.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconButton6.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton6.Location = new Point(845, 623);
+            iconButton6.Location = new Point(966, 831);
+            iconButton6.Margin = new Padding(3, 4, 3, 4);
             iconButton6.Name = "iconButton6";
-            iconButton6.Size = new Size(181, 42);
+            iconButton6.Size = new Size(207, 56);
             iconButton6.TabIndex = 10;
             iconButton6.Text = "Descargar excel";
             iconButton6.UseVisualStyleBackColor = true;
@@ -171,17 +180,19 @@
             // 
             // textBox1
             // 
-            textBox1.Location = new Point(274, 136);
+            textBox1.Location = new Point(313, 181);
+            textBox1.Margin = new Padding(3, 4, 3, 4);
             textBox1.Name = "textBox1";
-            textBox1.Size = new Size(126, 23);
+            textBox1.Size = new Size(143, 27);
             textBox1.TabIndex = 11;
             textBox1.TextChanged += textBox1_TextChanged_1;
             // 
             // button1
             // 
-            button1.Location = new Point(488, 107);
+            button1.Location = new Point(558, 143);
+            button1.Margin = new Padding(3, 4, 3, 4);
             button1.Name = "button1";
-            button1.Size = new Size(104, 31);
+            button1.Size = new Size(119, 41);
             button1.TabIndex = 12;
             button1.Text = "Limpiar Filtro";
             button1.UseVisualStyleBackColor = true;
@@ -189,9 +200,10 @@
             // 
             // PanelProveedores
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1280, 819);
+            BackColor = Color.LightSkyBlue;
+            ClientSize = new Size(1126, 629);
             Controls.Add(button1);
             Controls.Add(textBox1);
             Controls.Add(iconButton6);
@@ -204,6 +216,7 @@
             Controls.Add(iconButton1);
             Controls.Add(dataGridView1);
             Controls.Add(label1);
+            Margin = new Padding(3, 4, 3, 4);
             Name = "PanelProveedores";
             Text = "PanelProveedores";
             Load += PanelProveedores_Load;

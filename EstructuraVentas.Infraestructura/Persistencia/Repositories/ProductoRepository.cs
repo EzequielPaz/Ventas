@@ -1,65 +1,99 @@
 ﻿using EstructuraVentas.Dominio;
+using EstructuraVentas.Dominio.Commons.Enums;
+
 using EstructuraVentas.Infraestructura.Commons.Bases.Request;
 using EstructuraVentas.Infraestructura.Commons.Bases.Response;
-using EstructuraVentas.Infraestructura.Persistencia.Contexto;
 using EstructuraVentas.Infraestructura.Persistencia.Interfaces;
+using MongoDB.Driver;
 using System.Linq.Expressions;
-using EstructuraVentas.Dominio.Commons.Enums;
 
 namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
 {
-    public class ProductoRepository 
-        //: GenericRepository<Producto>, IProductRepository
+    public class ProductoRepository
+        : GenericRepository<Producto>, IProductRepository
     {
-        //public ProductoRepository(ApplicationDbContext context) : base(context)
-        //{
-        //}
+        private readonly IMongoCollection<Producto> _collection;
 
-        //// Listado con filtros y paginación
-        //public async Task<BaseEntityResponse<Producto>> ListProductos(BaseFilterRequest filters)
-        //{
-        //    // Normalizamos filtros
-        //    string texto = filters.TextFilter?.Trim().ToLower();
-        //    Estado? estado = filters.StateFilter.HasValue
-        //        ? (Estado?)filters.StateFilter.Value
-        //        : null;
+        public ProductoRepository(IMongoDatabase database)
+            : base(database, "Productos")
+        {
+            _collection = database.GetCollection<Producto>("Productos");
+        }
 
-        //    // Construimos expresión de filtrado
-        //    Expression<Func<Producto, bool>> filtro = p =>
-        //        (string.IsNullOrEmpty(texto) ||
-        //            p.Nombre.ToLower().Contains(texto) ||
-        //            (p.Descripcion != null && p.Descripcion.ToLower().Contains(texto)) ||
-        //            (p.Marca != null && p.Marca.ToLower().Contains(texto)) ||
-        //            p.Codigo.ToLower().Contains(texto)) &&
-        //        (!estado.HasValue || p.Estado == estado.Value);
+        // ============================================
+        // LISTADO CON FILTROS + PAGINACIÓN (MongoDB)
+        // ============================================
+        public async Task<BaseEntityResponse<Producto>> ListProductos(BaseFilterRequest filters)
+        {
+            var builder = Builders<Producto>.Filter;
+            var filter = builder.Empty;
 
-        //    // Llamada al método genérico
-        //    return await ListAsync(filters, filtro);
-        //}
+            // Texto a buscar
+            if (!string.IsNullOrEmpty(filters.TextFilter))
+            {
+                var texto = filters.TextFilter.Trim();
 
-        //// Obtener cliente por ID
-        //public async Task<Producto?> GetProductById(int id)
-        //{
-        //    return await GetByIdAsync(id);
-        //}
+                filter &= builder.Or(
+                    builder.Regex(p => p.Nombre, new MongoDB.Bson.BsonRegularExpression(texto, "i")),
+                    builder.Regex(p => p.Descripcion, new MongoDB.Bson.BsonRegularExpression(texto, "i")),
+                    builder.Regex(p => p.Marca, new MongoDB.Bson.BsonRegularExpression(texto, "i")),
+                    builder.Regex(p => p.Codigo, new MongoDB.Bson.BsonRegularExpression(texto, "i"))
+                );
+            }
 
-        //// Registrar producto (sin SaveChanges, lo hace UnitOfWork)
-        //public async Task RegisterProduct(Producto producto)
-        //{
-        //    await AddAsync(producto);
-        //}
+            // Filtro por Estado
+            if (filters.StateFilter.HasValue)
+            {
+                Estado estado = (Estado)filters.StateFilter.Value;
+                filter &= builder.Eq(p => p.Estado, estado);
+            }
 
-        //// Editar Producto (sin SaveChanges, lo hace UnitOfWork)
-        //public void EditProduct(Producto product)
-        //{
-        //    Update(product);
-        //}
+            long totalRecords = await _collection.CountDocumentsAsync(filter);
 
-        //// Eliminar producto (sin SaveChanges, lo hace UnitOfWork)
-        //public void DeleteClient(Producto product)
-        //{
-        //    Remove(product);
-        //}
+            var result = await _collection.Find(filter)
+                .Skip((filters.PageIndex - 1) * filters.PageSize)
+                .Limit(filters.PageSize)
+                .ToListAsync();
 
+            return new BaseEntityResponse<Producto>
+            {
+                TotalRecords = (int)totalRecords,
+                Records = result
+            };
+        }
+
+        // ============================================
+        // OBTENER PRODUCTO POR ID
+        // ============================================
+        public async Task<Producto?> GetProductById(string id)
+        {
+            return await _collection.Find(p => p.IdProducto == id).FirstOrDefaultAsync();
+        }
+
+        // ============================================
+        // REGISTRAR PRODUCTO
+        // ============================================
+        public async Task RegisterProduct(Producto producto)
+        {
+            await _collection.InsertOneAsync(producto);
+        }
+
+        // ============================================
+        // EDITAR PRODUCTO
+        // ============================================
+        public async Task EditProduct(Producto producto)
+        {
+            await _collection.ReplaceOneAsync(
+                p => p.IdProducto == producto.IdProducto,
+                producto);
+        }
+
+        // ============================================
+        // ELIMINAR PRODUCTO
+        // ============================================
+        public async Task DeleteProduct(Producto producto)
+        {
+            await _collection.DeleteOneAsync(p => p.IdProducto == producto.IdProducto);
+        }
     }
 }

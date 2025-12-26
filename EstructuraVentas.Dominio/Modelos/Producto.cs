@@ -2,6 +2,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using EstructuraVentas.Dominio.Commons.Enums;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 
 namespace EstructuraVentas.Dominio
@@ -9,8 +11,9 @@ namespace EstructuraVentas.Dominio
     public class Producto
     {
         [Required]
-        [Key]
-        public int IdProducto { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string IdProducto { get; set; }  
 
         [Required, StringLength(100)]
         
@@ -34,10 +37,12 @@ namespace EstructuraVentas.Dominio
         public Estado Estado { get; set; } = Estado.Activo;
 
         // Clave foránea
+        //[BsonRepresentation(BsonType.ObjectId)]
         public int CategoriaId { get; set; }
 
+
         // Propiedad de navegación
-        [ForeignKey("CategoriaId")]
+        //[ForeignKey("CategoriaId")]
         public Categoria? Categoria { get; set; }
     }
 

@@ -10,7 +10,7 @@ namespace EstructuraVentas.LogicaNegocio.DTOs.Producto
 {
     public class UpdateProductDTO
     {
-        public int IdProducto { get; set; }
+        public string IdProducto { get; set; }
 
         public string? Nombre { get; set; }
 

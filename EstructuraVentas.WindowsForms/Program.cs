@@ -93,6 +93,9 @@ namespace EstructuraVentas.WindowsForms
             services.AddScoped<ProveedorServicio>();
             services.AddScoped<CategoriaServicio>();
             services.AddScoped<VentaServicio>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<ProductoServicios>();
+
 
             // 5. Formas (Paneles/Vistas)
             services.AddScoped<PanelClientes>();

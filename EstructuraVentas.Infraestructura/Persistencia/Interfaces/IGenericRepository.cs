@@ -1,5 +1,6 @@
 ﻿using EstructuraVentas.Infraestructura.Commons.Bases.Request;
 using EstructuraVentas.Infraestructura.Commons.Bases.Response;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace EstructuraVentas.Infraestructura.Persistencia.Interfaces
@@ -19,6 +20,7 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Interfaces
         Task<BaseEntityResponse<T>> ListAsync(
             BaseFilterRequest filters,
             Expression<Func<T, bool>>? extraFilter = null
+            //Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null
         );
     }
 }

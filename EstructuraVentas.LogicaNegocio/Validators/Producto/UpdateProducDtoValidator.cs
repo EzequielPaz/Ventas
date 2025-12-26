@@ -13,8 +13,8 @@ namespace EstructuraVentas.LogicaNegocio.Validators.Producto
         public UpdateProducDtoValidator()
         {
             RuleFor(p => p.IdProducto)
-            .GreaterThan(0)
-            .WithMessage("El ID del producto debe ser válido.");
+                .NotEmpty().WithMessage("El ID del producto es obligatorio.")
+                .Length(24).WithMessage("El ID del producto debe tener 24 caracteres (ObjectId de MongoDB).");
 
             RuleFor(p => p.Nombre)
                 .NotEmpty().WithMessage("El nombre del producto es obligatorio.")
@@ -41,7 +41,7 @@ namespace EstructuraVentas.LogicaNegocio.Validators.Producto
                 .WithMessage("El precio debe ser mayor que 0.");
 
             RuleFor(p => p.CategoriaId)
-                .GreaterThan(0)
+                .NotEmpty()
                 .WithMessage("Debe seleccionarse una categoría válida.");
 
         }

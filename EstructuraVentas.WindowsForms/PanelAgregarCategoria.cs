@@ -42,49 +42,49 @@ namespace EstructuraVentas.WindowsForms
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            //var nombreTexto = textBox1.Text;
-            //var descripcion = richTextBox1.Text;
+            var nombreTexto = textBox1.Text;
+            var descripcion = richTextBox1.Text;
 
-            ////Validar que todos los campos estén completos
-            //if (string.IsNullOrEmpty(nombreTexto) ||
-            //    string.IsNullOrEmpty(descripcion))
+            //Validar que todos los campos estén completos
+            if (string.IsNullOrEmpty(nombreTexto) ||
+                string.IsNullOrEmpty(descripcion))
 
-            //{
-            //    MessageBox.Show("Debes llenar todos los campos.");
-            //    return;
-            //}
+            {
+                MessageBox.Show("Debes llenar todos los campos.");
+                return;
+            }
 
-            ////var nuevaCategoria = new Categoria
-            //var nuevaCategoriaDTO = new CreateCategoriaDTO
-            //{
-            //    Nombre = nombreTexto,
-            //    Descripcion = descripcion
-            //};
+            //var nuevaCategoria = new Categoria
+            var nuevaCategoriaDTO = new CreateCategoriaDTO
+            {
+                Nombre = nombreTexto,
+                Descripcion = descripcion
+            };
 
-            //try
-            //{
-            //    var categoriaServicio = _serviceProvider.GetService<CategoriaServicio>();
-            //    //await categoriaServicio.AgregarCategoriaAsync(nuevaCategoria);
-            //    await categoriaServicio.AgregarCategoriaAsync(nuevaCategoriaDTO);
+            try
+            {
+                var categoriaServicio = _serviceProvider.GetService<CategoriaServicio>();
+                //await categoriaServicio.AgregarCategoriaAsync(nuevaCategoria);
+                await categoriaServicio.AgregarCategoriaAsync(nuevaCategoriaDTO);
 
 
-            //    MessageBox.Show("¡Categoria registrada con éxito!");
-            //    LimpiarCampos();
-            //    this.Hide();
+                MessageBox.Show("¡Categoria registrada con éxito!");
+                LimpiarCampos();
+                this.Hide();
 
-            //}
+            }
 
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show("Error al registrar categoria: " + ex.Message);
-            //}
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al registrar categoria: " + ex.Message);
+            }
         }
 
-        //    private void LimpiarCampos()
-        //    {
-        //        textBox1.Clear();
-        //        richTextBox1.Clear();
-        //    }
-        //}
+        private void LimpiarCampos()
+        {
+            textBox1.Clear();
+            richTextBox1.Clear();
+        }
     }
 }
+

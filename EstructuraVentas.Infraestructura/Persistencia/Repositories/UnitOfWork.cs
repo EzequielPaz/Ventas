@@ -11,6 +11,9 @@ namespace EstructuraVentas.Infraestructura.Persistencia.Repositories
     {
         private readonly IMongoDatabase _database;
 
+        public IMongoDatabase Database => _database;
+
+
         public IGenericRepository<Cliente> Clientes { get; }
         public IGenericRepository<Producto> Productos { get; }
         public IGenericRepository<Categoria> Categorias { get; }

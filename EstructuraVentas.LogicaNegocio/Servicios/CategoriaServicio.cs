@@ -12,6 +12,8 @@ using EstructuraVentas.LogicaNegocio.Validators.Cliente;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,93 +25,146 @@ namespace EstructuraVentas.LogicaNegocio.Servicios
 {
     public class CategoriaServicio
     {
-        //private readonly IUnitOfWork _unitOfWork;
-        //private readonly CreateCategoriaDTOValidator _validatorCreate;
-        //private readonly UpdateCategoriaDTOValidator _validatorUpdate;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly CreateCategoriaDTOValidator _validatorCreate;
+        private readonly UpdateCategoriaDTOValidator _validatorUpdate;
 
-        //public CategoriaServicio(IUnitOfWork unitOfWork)
-        //{
-        //    _unitOfWork = unitOfWork;
-        //    _validatorCreate = new CreateCategoriaDTOValidator();
-        //    _validatorUpdate = new UpdateCategoriaDTOValidator();
-        //}
+        public CategoriaServicio(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+            _validatorCreate = new CreateCategoriaDTOValidator();
+            _validatorUpdate = new UpdateCategoriaDTOValidator();
+        }
 
-        //// ----------------- Agregar Categoría -----------------
-        //public async Task AgregarCategoriaAsync(CreateCategoriaDTO dto)
-        //{
-        //    if (dto == null)
-        //        throw new ArgumentNullException(nameof(dto));
+        //----------------- Método para obtener el siguiente CategoriaId -----------------
+        private async Task<int> GetNextCategoriaIdAsync()
+        {
+            var filter = Builders<BsonDocument>.Filter.Eq("_id", "categoriaid");
+            var update = Builders<BsonDocument>.Update.Inc("sequence_value", 1);
 
-        //    var resultado = _validatorCreate.Validate(dto);
-        //    if (!resultado.IsValid)
-        //        throw new ValidationException(resultado.Errors);
+            var options = new FindOneAndUpdateOptions<BsonDocument>
+            {
+                ReturnDocument = ReturnDocument.After,
+                IsUpsert = true
+            };
 
-        //    var categoria = dto.ToEntity();
+            // Suponiendo que tu _unitOfWork tiene acceso a la DB
+            var countersCollection = _unitOfWork.Database.GetCollection<BsonDocument>("counters");
+            var result = await countersCollection.FindOneAndUpdateAsync(filter, update, options);
 
-        //    await _unitOfWork.Categorias.AddAsync(categoria);
-        //    await _unitOfWork.SaveChangesAsync();
-        //}
+            return result["sequence_value"].AsInt32;
+        }
 
-        //// ----------------- Mostrar Categorías -----------------
-        //public async Task<BaseEntityResponse<Categoria>> MostrarCategoriasAsync(BaseFilterRequest? filters = null)
-        //{
-        //    filters ??= new BaseFilterRequest();
 
-        //    Expression<Func<Categoria, bool>> filtro = c =>
-        //        string.IsNullOrEmpty(filters.TextFilter) ||
-        //        EF.Functions.Like(c.Nombre, $"%{filters.TextFilter}%");
 
-        //    var response = await _unitOfWork.Categorias.ListAsync(
-        //    filters,
-        //    filtro,
-        //    include: q => q.Include(c => c.Productos)
-        //    );
+        // ----------------- Agregar Categoría -----------------
+        public async Task AgregarCategoriaAsync(CreateCategoriaDTO dto)
+        {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
 
-        //    return response;
-        //}
+            var resultado = _validatorCreate.Validate(dto);
+            if (!resultado.IsValid)
+                throw new ValidationException(resultado.Errors);
 
-        //// ----------------- Modificar Categoría -----------------
-        //public async Task ModificarCategoriaAsync(UpdateCategoriaDTO dto)
-        //{
-        //    if (dto == null)
-        //        throw new ArgumentNullException(nameof(dto));
+            var categoria = dto.ToEntity();
 
-        //    var resultado = _validatorUpdate.Validate(dto);
-        //    if (!resultado.IsValid)
-        //        throw new ValidationException(resultado.Errors);
+            // Asignar CategoriaId autoincremental
+            categoria.CategoriaId = await GetNextCategoriaIdAsync();
 
-        //    var categoriaExistente = await _unitOfWork.Categorias.GetByIdAsync(dto.IdCategoria);
-        //    if (categoriaExistente == null)
-        //        throw new KeyNotFoundException("La categoría no existe");
+            await _unitOfWork.Categorias.AddAsync(categoria);
+            await _unitOfWork.SaveChangesAsync();
+        }
+        /*
+        // ----------------- Mostrar Categorías -----------------
+        public async Task<BaseEntityResponse<Categoria>> MostrarCategoriasAsync(BaseFilterRequest? filters = null)
+        {
+            filters ??= new BaseFilterRequest();
 
-        //    categoriaExistente.UpdateEntity(dto);
-        //    _unitOfWork.Categorias.Update(categoriaExistente);
+            Expression<Func<Categoria, bool>> filtro = c =>
+                string.IsNullOrEmpty(filters.TextFilter) ||
+                c.Nombre.ToLower().Contains(filters.TextFilter.ToLower());
 
-        //    await _unitOfWork.SaveChangesAsync();
-        //}
+            // ACÁ la llamada correcta
+            var response = await _unitOfWork.Categorias.ListAsync(filters, filtro);
 
-        //// ----------------- Eliminar Categoría -----------------
-        //public async Task EliminarCategoriaAsync(int idCategoria)
-        //{
-        //    var categoria = await _unitOfWork.Categorias.GetByIdAsync(idCategoria);
-        //    if (categoria == null)
-        //        throw new KeyNotFoundException("La categoría no existe");
+            return response;
+        }
+        */
 
-        //    _unitOfWork.Categorias.Remove(categoria);
-        //    await _unitOfWork.SaveChangesAsync();
-        //}
+        // ----------------- Mostrar Categorías -----------------
+        public async Task<BaseEntityResponse<CategoriaDTO>> MostrarCategoriasAsync(BaseFilterRequest? filters = null)
+        {
+            filters ??= new BaseFilterRequest();
 
-        //// ----------------- Obtener Categoría por Id -----------------
-        //public async Task<CategoriaDTO> ObtenerPorIdCategoriaAsync(int idCategoria)
-        //{
-        //    var categoria = await _unitOfWork.Categorias
-        //        .GetByIdAsync(idCategoria, include: q => q.Include(c => c.Productos));
+            Expression<Func<Categoria, bool>> filtro = c =>
+                string.IsNullOrEmpty(filters.TextFilter) ||
+                c.Nombre.ToLower().Contains(filters.TextFilter.ToLower());
 
-        //    if (categoria == null)
-        //        throw new KeyNotFoundException("La categoría no existe");
+            var categorias = await _unitOfWork.Categorias.ListAsync(filters, filtro);
 
-        //    return categoria.ToDTO();
-        //}
+            return new BaseEntityResponse<CategoriaDTO>
+            {
+                TotalRecords = categorias.TotalRecords,
+                Records = categorias.Records.Select(c => new CategoriaDTO
+                {
+                    CatId = c.CatId,
+                    CategoriaId = c.CategoriaId,
+                    Nombre = c.Nombre,
+                    Descripcion = c.Descripcion,
+                    CantidadProductos = c.Productos?.Count ?? 0
+                }).ToList()
+            };
+        }
+
+
+
+
+
+
+        // ----------------- Modificar Categoría -----------------
+        public async Task ModificarCategoriaAsync(UpdateCategoriaDTO dto)
+        {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
+
+            var resultado = _validatorUpdate.Validate(dto);
+            if (!resultado.IsValid)
+                throw new ValidationException(resultado.Errors);
+
+            var categoriaExistente = await _unitOfWork.Categorias.GetByIdAsync(dto.IdCategoria);
+            if (categoriaExistente == null)
+                throw new KeyNotFoundException("La categoría no existe");
+
+            categoriaExistente.UpdateEntity(dto);
+            await _unitOfWork.Categorias.UpdateAsync(categoriaExistente.CatId, categoriaExistente);
+
+
+
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        // ----------------- Eliminar Categoría -----------------
+        public async Task EliminarCategoriaAsync(string CatId)
+        {
+            var categoria = await _unitOfWork.Categorias.GetByIdAsync(CatId);
+            if (categoria == null)
+                throw new KeyNotFoundException("La categoría no existe");
+
+            await _unitOfWork.Categorias.RemoveAsync(CatId);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        // ----------------- Obtener Categoría por Id -----------------
+        public async Task<CategoriaDTO> ObtenerPorIdCategoriaAsync(string CatId)
+        {
+            var categoria = await _unitOfWork.Categorias.GetByIdAsync(CatId);
+
+            if (categoria == null)
+                throw new KeyNotFoundException("La categoría no existe");
+
+            return categoria.ToDTO();
+        }
 
     }
 
